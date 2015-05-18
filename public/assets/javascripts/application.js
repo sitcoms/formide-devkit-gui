@@ -33892,7 +33892,7 @@ angular.module('sdk.file', []).factory('$file', ['$rootScope', '$http', '$timeou
 	    
 	    // check for unsaved changes
 	    var should_delete = false;
-	    if( factory.files[ file_path ]._changed )
+	    if( typeof factory.files[ file_path ] != 'undefined' && factory.files[ file_path ]._changed )
 	    {
 			if( confirm("There are unsaved changes, close " + factory.files[ file_path ].name + " anyway?" ) ) {
 				should_delete = true;
@@ -34207,14 +34207,6 @@ var ApplicationController = function($scope, $rootScope, $timeout, $stoplight, $
 	$scope.loaded = false;
 	$scope.platform = os.platform();
 
-	if(window.localStorage.sdk_settings) {
-		$scope.settings = JSON.parse(window.localStorage.sdk_settings);
-	}
-	else {
-		$scope.settings = {};
-		$scope.settings.theme = 'dark';
-	}
-
 	$scope.focus = true;
 	$scope.blurred = false;
 
@@ -34226,22 +34218,7 @@ var ApplicationController = function($scope, $rootScope, $timeout, $stoplight, $
 	$scope.fileHistory = [];
 	$scope.path = false; // current project path
 
-	$scope.themes = [
-		{ name: "Dark Theme", id: "dark" }, 
-		{ name: "Light Theme", id: "light" }
-	];
-
 	var obj = {content:null};
-
-    $http.get('./package.json').success(function(data) {
-        $scope.settings.package = data;
-    });  
-
-	$scope.$watch('settings', function(newVal, oldVal){
-	    window.localStorage.sdk_settings = JSON.stringify($scope.settings);
-
-	    // hook.call('onSettingsChange', $scope.settings);
-	}, true);
 
 	$scope.toggleSettings = function() {
 		ngDialog.open({ 
@@ -36222,3 +36199,34 @@ var FormideUploadController = function($scope, $rootScope, $file) {
 FormideUploadController.$inject = ['$scope', '$rootScope', '$file'];
 
 app.controller("FormideUploadController", FormideUploadController);;
+var SettingsController = function($scope, $rootScope) {
+	
+	if(window.localStorage.sdk_settings) {
+		$scope.settings = JSON.parse(window.localStorage.sdk_settings);
+	}
+	else {
+		$scope.settings = {};
+		$scope.settings.theme = 'dark';
+	}
+	
+	document.html.className += $scope.settings.theme;
+	
+	$scope.themes = [
+		{ name: "Dark Theme", id: "dark" }, 
+		{ name: "Light Theme", id: "light" }
+	];
+	
+	$http.get('./package.json').success(function(data) {
+        $scope.settings.package = data;
+    });  
+
+	$scope.$watch('settings', function(newVal, oldVal){
+	    window.localStorage.sdk_settings = JSON.stringify($scope.settings);
+
+	    // hook.call('onSettingsChange', $scope.settings);
+	}, true);
+};
+
+SettingsController.$inject = ['$scope', '$rootScope'];
+
+app.controller("SettingsController", SettingsController);
