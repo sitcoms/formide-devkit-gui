@@ -34,9 +34,9 @@
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/athombv/devkit/issues"
+    "url": "https://github.com/PRINTR3D/devkit-app/issues"
   },
-  "homepage": "https://github.com/athombv/devkit",
+  "homepage": "https://developers.formide.com",
   "private": false,
   "dependencies": {
     "archiver": "^0.14.3",

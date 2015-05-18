@@ -10,8 +10,15 @@
 	<hr class="rule"/>
 
 	<section>
+		<h4>More info</h4>
+		<a ng-click="openHomepage()" href="" target="_blank">{{settings.package.homepage}}</a>
+	</section>
+	
+	<hr class="rule"/>
+
+	<section>
 		<h4>Report a bug:</h4>
-		<a href="{{settings.package.bugs.url}}">{{settings.package.bugs.url}}</a>
+		<a ng-click="openIssues()" href="" target="_blank">{{settings.package.bugs.url}}</a>
 	</section>
 
 	<hr class="rule"/>
