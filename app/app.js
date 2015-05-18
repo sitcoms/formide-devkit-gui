@@ -35,6 +35,7 @@ loadModule('settings',		'popup',	'./app/components/popups/settings/');
 loadModule('theme_dark',	'theme',	'./app/components/themes/theme_dark/');
 loadModule('theme_light',	'theme',	'./app/components/themes/theme_light/');
 loadModule('custom_icons',	'theme',	'./app/components/themes/custom_icons/');
+loadModule('font_awesome',	'theme',	'./app/components/themes/font-awesome/');
 
 /*
  * Use this area to define global settings for your app like the file editor config and devtools

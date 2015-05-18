@@ -14,6 +14,10 @@ var AuthController = function($scope, $rootScope, $http, $popup)
 		}
 	};
 	
+	$scope.settings = function() {
+		$popup.open('settings', $scope);	
+	};
+	
 	$scope.login = function() {
 		$popup.open('login', $scope);
 		
