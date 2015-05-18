@@ -5,7 +5,7 @@ window.CONFIG.paths = {
 	root:		window.location.protocol + '//' + window.location.hostname + ':' + window.location.port,
 	login:		'https://sdk.formide.com',
 	user:		'https://api2.formide.com/auth/me',
-	appManager:	'https://apps.formide.com',
+	appManager:	'https://developers.formide.com',
 	apiRoot:	'https://api2.formide.com'
 };
 
