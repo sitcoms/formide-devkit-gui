@@ -1,8 +1,8 @@
 .popup-login .ngdialog-content {
-	width: 340px;
+	width: 400px;
 	height: 500px;
 	position: relative;
-	background: red;
+	background: white;
 }
 
 .popup-login iframe {

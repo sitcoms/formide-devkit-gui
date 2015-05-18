@@ -90,11 +90,9 @@ var AuthController = function($scope, $rootScope, $http, $popup)
 			// save tokens to localStorage
 			window.localStorage.access_token = e.data.accessToken;
 			window.localStorage.refresh_token = e.data.refreshToken;
-
-			// hide popup
-			$scope.$parent.setBlur(false);
-			$scope.$parent.setPopup('', false);
-
+			
+			$popup.close(); // close opened popup
+			
 			// set userinfo
 			$scope.getUserInfo();
 		});
