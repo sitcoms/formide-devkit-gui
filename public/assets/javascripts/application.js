@@ -34115,7 +34115,7 @@ angular.module('sdk.popup', []).factory('$popup', ['$rootScope', 'ngDialog', fun
 		var dir = '';
 		for (var i=0; i<angularModules.length; i++) {
 
-			if (angularModules[i].module == name){
+			if (angularModules[i].module == name && angularModules[i].type == 'popup'){
 				var dir = angularModules[i].dir;
 			} 
 		}
@@ -34124,6 +34124,7 @@ angular.module('sdk.popup', []).factory('$popup', ['$rootScope', 'ngDialog', fun
 
 		ngDialog.open({ 
 			template: html_path,
+			className: 'popup-' + name,
 			scope: scope
 		});
 	}
@@ -34241,12 +34242,6 @@ var ApplicationController = function($scope, $rootScope, $timeout, $stoplight, $
 	$scope.focus = true;
 	$scope.blurred = false;
 
-/*
-	$scope.popup = {};
-	$scope.popup.url = '';
-	$scope.popup.visible = false;
-*/
-
 	$scope.files = {}; // files open
 	$scope.fileHistory = [];
 	$scope.path = false; // current project path
@@ -34262,21 +34257,6 @@ var ApplicationController = function($scope, $rootScope, $timeout, $stoplight, $
 	{
 		$scope.focus = focus;
 	}
-
-/*
-	$scope.setPopup = function(url, visible)
-	{
-		$scope.popup.url = url;
-		$scope.popup.visible = visible;
-	}
-
-	$scope.closePopup = function()
-	{
-		$scope.setBlur(false);
-		$scope.setPopup('', false);
-		$scope.user.status = 'logged-out';
-	}
-*/
 
 	$scope.newFile = function() {
 		$rootScope.$emit('service.project.new.file');
@@ -35965,7 +35945,9 @@ var AuthController = function($scope, $rootScope, $http, $popup)
 	};
 	
 	$scope.login = function() {
-		$scope.$parent.setPopup(window.CONFIG.paths.login, true);
+		$popup.open('login', $scope);
+		
+		//$scope.$parent.setPopup(window.CONFIG.paths.login, true);
 		$rootScope.$emit('devkit.blur', true);
 	};
 
