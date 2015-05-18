@@ -34241,9 +34241,11 @@ var ApplicationController = function($scope, $rootScope, $timeout, $stoplight, $
 	$scope.focus = true;
 	$scope.blurred = false;
 
+/*
 	$scope.popup = {};
 	$scope.popup.url = '';
 	$scope.popup.visible = false;
+*/
 
 	$scope.files = {}; // files open
 	$scope.fileHistory = [];
@@ -34261,6 +34263,7 @@ var ApplicationController = function($scope, $rootScope, $timeout, $stoplight, $
 		$scope.focus = focus;
 	}
 
+/*
 	$scope.setPopup = function(url, visible)
 	{
 		$scope.popup.url = url;
@@ -34273,6 +34276,7 @@ var ApplicationController = function($scope, $rootScope, $timeout, $stoplight, $
 		$scope.setPopup('', false);
 		$scope.user.status = 'logged-out';
 	}
+*/
 
 	$scope.newFile = function() {
 		$rootScope.$emit('service.project.new.file');
@@ -35152,6 +35156,7 @@ loadModule('auth', 			'header',	'./app/components/headers/devkit-printr-header-a
 loadModule('upload', 		'header',	'./app/components/headers/devkit-printr-header-upload/');
 
 // popups
+loadModule('login',			'popup',	'./app/components/popups/login/');
 loadModule('settings',		'popup',	'./app/components/popups/settings/');
 
 // widgets
@@ -35958,8 +35963,6 @@ var AuthController = function($scope, $rootScope, $http, $popup)
 			}
 		}
 	};
-
-	//$popup.open('settings', $scope);
 	
 	$scope.login = function() {
 		$scope.$parent.setPopup(window.CONFIG.paths.login, true);
@@ -36225,6 +36228,16 @@ var FormideUploadController = function($scope, $rootScope, $file) {
 FormideUploadController.$inject = ['$scope', '$rootScope', '$file'];
 
 app.controller("FormideUploadController", FormideUploadController);;
+var LoginController = function($scope, $rootScope) {
+	
+	$scope.loginUrl = window.CONFIG.paths.login;
+};
+
+LoginController.$inject = ['$scope', '$rootScope'];
+
+app.controller("LoginController", LoginController);;
+document.getElementsByTagName('html')[0].className = JSON.parse(window.localStorage.sdk_settings)['theme'];
+
 var SettingsController = function($scope, $rootScope, $http) {
 	
 	$scope.themes = [

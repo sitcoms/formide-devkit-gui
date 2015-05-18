@@ -25,6 +25,7 @@ loadModule('auth', 			'header',	'./app/components/headers/devkit-printr-header-a
 loadModule('upload', 		'header',	'./app/components/headers/devkit-printr-header-upload/');
 
 // popups
+loadModule('login',			'popup',	'./app/components/popups/login/');
 loadModule('settings',		'popup',	'./app/components/popups/settings/');
 
 // widgets

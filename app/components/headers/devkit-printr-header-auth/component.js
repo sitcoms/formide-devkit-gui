@@ -15,7 +15,9 @@ var AuthController = function($scope, $rootScope, $http, $popup)
 	};
 	
 	$scope.login = function() {
-		$scope.$parent.setPopup(window.CONFIG.paths.login, true);
+		$popup.open('login', $scope);
+		
+		//$scope.$parent.setPopup(window.CONFIG.paths.login, true);
 		$rootScope.$emit('devkit.blur', true);
 	};
 
