@@ -1,7 +1,7 @@
 {
   "name": "devkit",
   "version": "0.0.1",
-  "description": "Athom Development Kit",
+  "description": "Formide Development Kit",
   "main": "core/index.html",
   "repository": {
     "type": "git",
@@ -17,8 +17,16 @@
     "Bower",
     "Grunt"
   ],
-  "author": "Athom BV",
+  "author": "Printr BV",
   "contributors": [
+	{
+      "name": "Bouke Regnerus",
+      "email": "bouke@printr.nl"
+    },
+    {
+      "name": "Chris ter Beke",
+      "email": "chris@printr.nl"
+    },
     {
       "name": "Emile Nijssen",
       "email": "emile@athom.nl"
