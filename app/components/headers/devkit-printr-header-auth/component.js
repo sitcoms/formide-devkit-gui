@@ -1,4 +1,4 @@
-var AuthController = function($scope, $rootScope, $http)
+var AuthController = function($scope, $rootScope, $http, $popup)
 {	
 	$scope.user = undefined;
 	
@@ -13,6 +13,8 @@ var AuthController = function($scope, $rootScope, $http)
 			}
 		}
 	};
+
+	$popup.open('settings', $scope);
 	
 	$scope.login = function() {
 		$scope.$parent.setPopup(window.CONFIG.paths.login, true);
@@ -99,6 +101,6 @@ var AuthController = function($scope, $rootScope, $http)
 	});
 }
 
-AuthController.$inject = ['$scope', '$rootScope', '$http'];
+AuthController.$inject = ['$scope', '$rootScope', '$http', '$popup'];
 
 app.controller("AuthController", AuthController);
