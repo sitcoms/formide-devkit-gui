@@ -35141,7 +35141,6 @@ loadModule('markdown', 		'widget',	'./core/components/widgets/devkit-widget-mark
 
 // themes
 
-
 // APP
 // editors
 loadModule('manifest', 		'editor',	'./app/components/editors/devkit-printr-editor-manifest/');
@@ -35150,6 +35149,9 @@ loadModule('viewer', 		'editor',	'./app/components/editors/devkit-printr-editor-
 // headers
 loadModule('auth', 			'header',	'./app/components/headers/devkit-printr-header-auth/');
 loadModule('upload', 		'header',	'./app/components/headers/devkit-printr-header-upload/');
+
+// popups
+loadModule('settings',		'popup',	'./app/components/popups/settings/');
 
 // widgets
 // nope..
@@ -36219,4 +36221,4 @@ var FormideUploadController = function($scope, $rootScope, $file) {
 
 FormideUploadController.$inject = ['$scope', '$rootScope', '$file'];
 
-app.controller("FormideUploadController", FormideUploadController);
+app.controller("FormideUploadController", FormideUploadController);;
