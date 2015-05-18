@@ -65,6 +65,7 @@ app.run(['$rootScope', '$timeout', '$file', function($rootScope, $timeout, $file
 			ext: ".stl",
 			config: {
 				editor: "viewer"
+			}
 		}
 	]);
 }]);

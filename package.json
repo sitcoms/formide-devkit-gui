@@ -2,7 +2,7 @@
   "name": "devkit",
   "version": "0.0.1",
   "description": "Athom Development Kit",
-  "main": "index.html",
+  "main": "core/index.html",
   "repository": {
     "type": "git",
     "url": "https://github.com/athombv/devkit.git"
