@@ -15,7 +15,6 @@ loadModule('markdown', 		'widget',	'./core/components/widgets/devkit-widget-mark
 
 // themes
 
-
 // APP
 // editors
 loadModule('manifest', 		'editor',	'./app/components/editors/devkit-printr-editor-manifest/');
