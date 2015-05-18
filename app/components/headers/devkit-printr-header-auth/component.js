@@ -13,8 +13,6 @@ var AuthController = function($scope, $rootScope, $http, $popup)
 			}
 		}
 	};
-
-	$popup.open('settings', $scope);
 	
 	$scope.login = function() {
 		$scope.$parent.setPopup(window.CONFIG.paths.login, true);

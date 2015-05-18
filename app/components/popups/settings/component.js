@@ -1,3 +1,5 @@
+document.getElementsByTagName('html')[0].className = JSON.parse(window.localStorage.sdk_settings)['theme'];
+
 var SettingsController = function($scope, $rootScope, $http) {
 	
 	$scope.themes = [
