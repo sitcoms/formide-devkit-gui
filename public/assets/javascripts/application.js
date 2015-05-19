@@ -33952,7 +33952,6 @@ angular.module('sdk.file', []).factory('$file', ['$rootScope', '$http', '$timeou
 
 	    for (var i in $rootScope.editorConfig) {
 	    	var item = $rootScope.editorConfig[i];
-<<<<<<< HEAD
 
 	    	console.log('file', file, item);
 
@@ -33960,15 +33959,6 @@ angular.module('sdk.file', []).factory('$file', ['$rootScope', '$http', '$timeou
 	    		widgets = item.config.widgets || widgets;
 	    		editor = item.config.editor || editor;
 
-=======
-
-	    	console.log('file', file, item);
-
-	    	if(file.ext === item.ext || file.dir === item.dir || file.base === item.base) {
-	    		widgets = item.config.widgets || widgets;
-	    		editor = item.config.editor || editor;
-
->>>>>>> 60d83b6747f680a51ad954507d34eddd288c7487
 	    		break;
 	    	}
 	    }
@@ -34118,7 +34108,6 @@ angular.module('sdk.project', []).factory('$project', ['$rootScope', function ($
 	var factory = {};
 
 	factory.getPath = function() {
-<<<<<<< HEAD
 		if(window.localStorage.project_dir) {
 			return window.localStorage.project_dir;
 		}
@@ -34126,9 +34115,6 @@ angular.module('sdk.project', []).factory('$project', ['$rootScope', function ($
 			return '';
 		}
 		
-=======
-		return window.localStorage.project_dir;
->>>>>>> 60d83b6747f680a51ad954507d34eddd288c7487
 	}
 
 	factory.setPath = function(path) {
@@ -34138,16 +34124,12 @@ angular.module('sdk.project', []).factory('$project', ['$rootScope', function ($
 	}
 
 	factory.getOpenFiles = function() {
-<<<<<<< HEAD
 		if(window.localStorage.files_open) {
 			return window.localStorage.files_open.split(',');
 		}
 		else {
 			return [''];
 		}
-=======
-		return window.localStorage.files_open.split(',');
->>>>>>> 60d83b6747f680a51ad954507d34eddd288c7487
 	}
 
 	factory.setOpenFiles = function(files) {
