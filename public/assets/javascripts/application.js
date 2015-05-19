@@ -33,7 +33,7 @@ function loadModule (module, type, dir, dependencies)
 		{
 			modules.push(dependency);
 		});
-	}
+    }
 
 	var self = this;
     
@@ -33322,7 +33322,7 @@ tagsInput.run(["$templateCache", function($templateCache) {
 ;
 /**
  * An Angular module that gives you access to the browsers local storage
- * @version v0.2.0 - 2015-05-10
+ * @version v0.2.1 - 2015-05-18
  * @link https://github.com/grevory/angular-local-storage
  * @author grevory <greg@gregpike.ca>
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -33338,14 +33338,6 @@ var isDefined = angular.isDefined,
   isArray = angular.isArray,
   extend = angular.extend,
   toJson = angular.toJson;
-
-
-// Test if string is only contains numbers
-// e.g '1' => true, "'1'" => true
-function isStringNumber(num) {
-  return  /^-?\d+\.?\d*$/.test(num.replace(/["']/g, ''));
-}
-
 var angularLocalStorage = angular.module('LocalStorageModule', []);
 
 angularLocalStorage.provider('localStorageService', function() {
@@ -33457,13 +33449,6 @@ angularLocalStorage.provider('localStorageService', function() {
       }
     }());
 
-    // Reviver function for JSON.parse that will be called
-    // for every key and value at every level of the final string -> JSON transformation
-    function reviver(key, value) {
-      if (value === 'true' || value === 'false') return value === 'true';
-      return value;
-    }
-
     // Directly adds a value to local storage
     // If local storage is not available in the browser use cookies
     // Example use: localStorageService.add('library','angular');
@@ -33471,7 +33456,7 @@ angularLocalStorage.provider('localStorageService', function() {
       // Let's convert undefined values to null to get the value consistent
       if (isUndefined(value)) {
         value = null;
-      } else if (isObject(value) || isArray(value) || isNumber(+value || value)) {
+      } else {
         value = toJson(value);
       }
 
@@ -33518,11 +33503,7 @@ angularLocalStorage.provider('localStorageService', function() {
         return null;
       }
 
-      if (item.charAt(0) === "{" || item.charAt(0) === "[" || isStringNumber(item)) {
-        return JSON.parse(item, reviver);
-      }
-
-      return item;
+      return JSON.parse(item);
     };
 
     // Remove an item from local storage
@@ -33692,9 +33673,9 @@ angularLocalStorage.provider('localStorageService', function() {
         }
         if (thisCookie.indexOf(deriveQualifiedKey(key) + '=') === 0) {
           var storedValues = decodeURIComponent(thisCookie.substring(prefix.length + key.length + 1, thisCookie.length))
-          try{
-            return JSON.parse(storedValues, reviver);
-          }catch(e){
+          try {
+            return JSON.parse(storedValues);
+          } catch(e) {
             return storedValues
           }
         }
@@ -33803,7 +33784,9 @@ module.services = angular.module('module.services', [
 	'sdk.file',
 	'sdk.stoplight',
 	'sdk.moduleload',
-	'sdk.popup'
+	'sdk.popup',
+	'sdk.project',
+	'sdk.menu'
 ]);;
 var module = module || {};
 
@@ -33827,7 +33810,7 @@ angular.module('sdk.events', []).factory('$events', ['$rootScope', '$q', functio
 
     return factory;
 }]);;
-angular.module('sdk.file', []).factory('$file', ['$rootScope', '$http', '$timeout', '$q', function ($rootScope, $http, $timeout, $q) {
+angular.module('sdk.file', []).factory('$file', ['$rootScope', '$http', '$timeout', '$q', '$project', function ($rootScope, $http, $timeout, $q, $project) {
 	    
 	var factory = {};
 	
@@ -33841,6 +33824,7 @@ angular.module('sdk.file', []).factory('$file', ['$rootScope', '$http', '$timeou
 
     factory.open = function( file_path )
     {
+    	var file_path = file_path || factory.active;
 
 	    // only load the file when it's not already open
 	    if( !factory.isOpen( file_path ) ) {
@@ -33889,8 +33873,9 @@ angular.module('sdk.file', []).factory('$file', ['$rootScope', '$http', '$timeou
 
     // close an item
     factory.close = function( file_path )
-    {
-	    
+    {  
+	    var file_path = file_path || factory.active;
+
 	    // check for unsaved changes
 	    var should_delete = false;
 	    if( typeof factory.files[ file_path ] != 'undefined' && factory.files[ file_path ]._changed )
@@ -33951,13 +33936,13 @@ angular.module('sdk.file', []).factory('$file', ['$rootScope', '$http', '$timeou
     	{
     		saveFile( file_path )
     	}
+
+    	$rootScope.$emit('service.file.save', file_path);
     }
 
     // get info (which views & widgets)
     factory.getInfo = function( file_path )
     {
-	    file_path = file_path.replace(window.localStorage.project_dir, '');
-
 	    // determine the view.
 	    var file = path.parse( file_path );
 
@@ -33965,53 +33950,26 @@ angular.module('sdk.file', []).factory('$file', ['$rootScope', '$http', '$timeou
 	    var editor = 'codemirror';
 	    var widgets = [];
 
-		for(var i in $rootScope.editorConfig) {
-			var configItem = $rootScope.editorConfig[i];
-			var extMatch = false;
-			var dirMatch = false;
-			var baseMatch = false;
+	    for (var i in $rootScope.editorConfig) {
+	    	var item = $rootScope.editorConfig[i];
 
-			if(configItem.ext) {
-				if(file.ext === configItem.ext) {
-					extMatch = true;
-				}
-			}
-			else {
-				extMatch = true;
-			}
+	    	console.log('file', file, item);
 
-			if(configItem.dir) {
-				if(file.dir === configItem.dir) {
-					dirMatch = true;
-				}
-			}
-			else {
-				dirMatch = true;
-			}
+	    	if(file.ext === item.ext || file.dir === item.dir || file.base === item.base) {
+	    		widgets = item.config.widgets || widgets;
+	    		editor = item.config.editor || editor;
 
-			if(configItem.base) {
-				if(file.base === configItem.base) {
-					baseMatch = true;
-				}
-			}
-			else {
-				baseMatch = true;
-			}
+	    		break;
+	    	}
+	    }
 
-			if(extMatch && dirMatch && baseMatch) {
-				return {
-				    editor: configItem.config.editor || editor,
-				    widgets: configItem.config.widgets || widgets,
-				    ext: file.ext,
-				}
-			}
-		}
-
-		return {
+	    var config = {
 		    editor: editor,
 		    widgets: widgets,
 		    ext: file.ext,
 		}
+
+		return config;
     }
 
     factory.setConfig = function(config) {
@@ -34029,13 +33987,16 @@ angular.module('sdk.file', []).factory('$file', ['$rootScope', '$http', '$timeou
 
 	    var activeFile = factory.files[ file_path ];
 
-	    fs.writeFileSync( file_path, activeFile.code );
+	    fs.writeFile( file_path, activeFile.code, function(err) {
+	    	console.log(err);
 
-		activeFile._changed = false;
+	    	activeFile._changed = false;
 
-		$rootScope.$emit('editor.saved');
-		$rootScope.$emit('editor.saved.' + activeFile.path);
+			$rootScope.$emit('editor.saved');
+			$rootScope.$emit('editor.saved.' + activeFile.path);
+	    });
     }
+    
 }]);;
 var hooks = hooks || [];
 
@@ -34069,6 +34030,17 @@ function Hook(path) {
 	};
 }
 ;
+angular.module('sdk.menu', []).factory('$menu', ['$rootScope', function ($rootScope) {
+	
+	var factory = {};
+	
+	factory.setConfig = function( args ){
+		
+	}
+	
+	return factory;
+	
+}]);;
  var path	= require('path');
 var fs		= require('fs');
 
@@ -34080,10 +34052,8 @@ angular.module('sdk.moduleload', [])
 
     $rootScope.modules = {};
 
-
     factory.load = function(module, type, dir)
     {
-
 		var html_path = path.join(dir, 'component.html');
 		fs.exists(html_path, function(exists) {
 			if(exists) {
@@ -34100,7 +34070,6 @@ angular.module('sdk.moduleload', [])
 			}
 		});
     }
-
 
     return factory;
 }]);;
@@ -34132,6 +34101,32 @@ angular.module('sdk.popup', []).factory('$popup', ['$rootScope', 'ngDialog', fun
 	factory.close = function() {
 		ngDialog.closeAll();
 	}
+
+    return factory;
+}]);;
+angular.module('sdk.project', []).factory('$project', ['$rootScope', function ($rootScope) {
+	var factory = {};
+
+	factory.getPath = function() {
+		return window.localStorage.project_dir;
+	}
+
+	factory.setPath = function(path) {
+		window.localStorage.project_dir = path;
+
+		return true;
+	}
+
+	factory.getOpenFiles = function() {
+		return window.localStorage.files_open.split(',');
+	}
+
+	factory.setOpenFiles = function(files) {
+		window.localStorage.files_open = files.join(',');
+
+		return true;
+	}
+
 
     return factory;
 }]);;
@@ -34174,7 +34169,7 @@ var modules = ['ng'];
 var angularModules = [];
 
 angular.element(document).ready(function() {
-    //require('nw.gui').Window.get().showDevTools();
+    require('nw.gui').Window.get().showDevTools();
     setTimeout(function()
     { 
         modules.push('app');
@@ -34327,21 +34322,40 @@ var ApplicationController = function($scope, $rootScope, $timeout, $stoplight, $
 	});
 
 
-
 	/* TODO: Make a service of this, that generates a menubar based on a JSON input. */
 
 	// menu
 
-	var osxMenuBar = new gui.Menu({
+	var menuBar = new gui.Menu({
 		type: "menubar"
 	});
-	osxMenuBar.createMacBuiltin("Devkit", {
-		hideWindow: true
-	});
+	
+	if( process.platform == 'darwin' ) {	
+		menuBar.createMacBuiltin("Devkit", {
+			hideWindow: true
+		});
+	} else {
+		var menuItem = new gui.MenuItem({ label: 'File' });
+		
+		var submenu = new gui.Menu();
+			submenu.append(new gui.MenuItem({ label: 'Item 1' }));
+			submenu.append(new gui.MenuItem({ label: 'Item 2' }));
+			submenu.append(new gui.MenuItem({ label: 'Item 3' }));
+			
+		menuItem.submenu = submenu;
+		menuBar.append(menuItem);
+		
+		menuBar.append(new gui.MenuItem({ label: 'Edit' }));
+		menuBar.append(new gui.MenuItem({ label: 'View' }));
+		
+		console.log(menuBar.items)
+	}
 
-	osxMenuBar.items[0].submenu.insert( new gui.MenuItem({ type: 'separator' }), 2 );
+	win.menu = menuBar;
 
-	osxMenuBar.items[0].submenu.insert(new gui.MenuItem({
+	menuBar.items[0].submenu.insert( new gui.MenuItem({ type: 'separator' }), 2 );
+
+	menuBar.items[0].submenu.insert(new gui.MenuItem({
 		label: 'Preferences...',
 		click: function() {
 			$scope.$apply(function() {
@@ -34352,10 +34366,8 @@ var ApplicationController = function($scope, $rootScope, $timeout, $stoplight, $
 		modifiers: 'cmd'
 	}), 3);
 
-	win.menu = osxMenuBar;
-
 	// app menu
-	osxMenuBar.items[0].submenu.insert(new gui.MenuItem({
+	menuBar.items[0].submenu.insert(new gui.MenuItem({
 		label: 'Check for updates...',
 		click: function() {
 			alert('this feature will come soon...');
@@ -34420,7 +34432,9 @@ var ApplicationController = function($scope, $rootScope, $timeout, $stoplight, $
 	file.insert(new gui.MenuItem({
 		label: 'Close tab',
 		click: function() {
-			$rootScope.$emit('service.file.close');
+			$scope.$apply(function() {
+				$file.close();
+			});
 		},
 		key: 'w',
 		modifiers: 'cmd'
@@ -34433,8 +34447,9 @@ var ApplicationController = function($scope, $rootScope, $timeout, $stoplight, $
 	file.insert(new gui.MenuItem({
 		label: 'Save',
 		click: function() {
-    		$file.save();
-    		$rootScope.$emit('service.file.save');
+			$scope.$apply(function() {
+				$file.save();
+			});
 		},
 		key: 's',
 		modifiers: 'cmd'
@@ -34497,13 +34512,13 @@ ApplicationController.$inject = ['$scope', '$rootScope', '$timeout', '$stoplight
 
 app.controller("ApplicationController", ApplicationController);
 ;
-var EditorController = function($rootScope, $scope, $file, $rootScope)
+var EditorController = function($rootScope, $scope, $file, $project, $rootScope, $timeout)
 {
 	var win = gui.Window.get();
 
 	win.on('close', function() {
 		this.hide(); // Pretend to be closed already
-		window.localStorage.files_open = '';
+		$project.setOpenFiles(['']);
 
 		var files_open = [];
 
@@ -34511,22 +34526,25 @@ var EditorController = function($rootScope, $scope, $file, $rootScope)
 			files_open.push( file_path );
 		}
 
-		window.localStorage.files_open = files_open.join(',');
+		$project.setOpenFiles(files_open);
 
 		this.close(true);
 	});
 
-
 	$scope.init = function() {
-		if(window.localStorage.files_open) {
-			var files_open = window.localStorage.files_open.split(',');
+		if($project.getOpenFiles()) {
+			var files_open = $project.getOpenFiles();
+
 			for( var file_path in files_open) {
 				$file.open(files_open[file_path]);
 			}
 		}
 	}
 
-	$scope.init();
+	$timeout(function() {
+		$scope.init();
+	});
+	
 
 	// open file
     $scope.open = function(file_path) {
@@ -34558,9 +34576,13 @@ var EditorController = function($rootScope, $scope, $file, $rootScope)
 	$rootScope.$on('service.file.close', function(){
 		$scope.update();
 	});
+
+	$rootScope.$on('service.file.save', function(){
+		$scope.update();
+	});
 }
 
-EditorController.$inject = ['$rootScope', '$scope', '$file', '$rootScope'];
+EditorController.$inject = ['$rootScope', '$scope', '$file', '$project', '$rootScope', '$timeout'];
 
 app.controller("EditorController", EditorController);;
 var gui			= require('nw.gui');
@@ -34571,17 +34593,18 @@ var fs_extra	= require('fs-extra');
 var trash		= require('trash');
 var watchTree 	= require("fs-watch-tree").watchTree;
 
-var SidebarController = function($scope, $rootScope, $file, $timeout) {
+var SidebarController = function($scope, $rootScope, $file, $timeout, $project) {
 	
 	$scope.selected = [];
 	$scope.renaming = false;
 	$scope.expanded = [];
 	$scope.filetree = {};
+	$scope.selectedIndex = 0;
 	
 	$scope.init = function() {
 		// load previous project, if available
-		if(typeof window.localStorage.project_dir == 'string') {
-			$scope.loadProject(window.localStorage.project_dir);
+		if(typeof $project.getPath() == 'string') {
+			$scope.loadProject($project.getPath());
 		}
 	}
 	
@@ -34613,7 +34636,8 @@ var SidebarController = function($scope, $rootScope, $file, $timeout) {
 	 * load a project
 	 */
 	$scope.loadProject = function(rootPath) {
-		window.localStorage.project_dir = rootPath;
+		$project.setPath(rootPath);
+		
         $scope.$parent.path = rootPath;
         
         // filetree
@@ -34634,7 +34658,7 @@ var SidebarController = function($scope, $rootScope, $file, $timeout) {
 	/*
 	 * select filepath
 	 */
-	$scope.select = function(filePath, event) {
+	$scope.select = function(filePath, index, event) {
 		
 		// multiple selection
         if( event.metaKey || event.ctrlKey ) {
@@ -34650,6 +34674,10 @@ var SidebarController = function($scope, $rootScope, $file, $timeout) {
         else {
             $scope.selected = [filePath];
         }
+
+        $scope.selectedIndex = index;
+
+        console.log(index, $scope.filetree[0].children[index]);
 	}
 
 	/*
@@ -34838,9 +34866,9 @@ var SidebarController = function($scope, $rootScope, $file, $timeout) {
 			}
 			
 			ctxmenu.append(new gui.MenuItem({ label: 'Open', click: function(){
-				$scope.selected.forEach(function( item_path ){
-					$file.open( item_path );					
-				});				
+				$scope.$apply(function() {
+					$file.open(item.path );	
+				});						
 			}}));
 			
 			ctxmenu.append(new gui.MenuItem({ label: 'Open With Default Editor', click: function(){
@@ -34959,7 +34987,7 @@ var SidebarController = function($scope, $rootScope, $file, $timeout) {
 	});
 }
 
-SidebarController.$inject = ['$scope', '$rootScope', '$file', '$timeout'];
+SidebarController.$inject = ['$scope', '$rootScope', '$file', '$timeout', '$project'];
 
 app.controller("SidebarController", SidebarController);
 
