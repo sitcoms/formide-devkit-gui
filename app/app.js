@@ -5,6 +5,7 @@
 //CORE
 // editors
 loadModule('codemirror', 	'editor',	'./core/components/editors/devkit-editor-codemirror/', ['ui.codemirror']);
+loadModule('image', 		'editor',	'./core/components/editors/devkit-editor-image/');
 
 // widgets
 loadModule('svg', 			'widget',	'./core/components/widgets/devkit-widget-svg/');
@@ -69,6 +70,26 @@ app.run(['$rootScope', '$timeout', '$file', function($rootScope, $timeout, $file
 			ext: ".stl",
 			config: {
 				editor: "viewer"
+			}
+		},
+		{
+			ext: ".jpg",
+			config: {
+				editor: "image"
+			}
+		}
+		,
+		{
+			ext: ".jpeg",
+			config: {
+				editor: "image"
+			}
+		}
+		,
+		{
+			ext: ".png",
+			config: {
+				editor: "image"
 			}
 		}
 	]);
