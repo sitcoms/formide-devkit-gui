@@ -120,7 +120,15 @@ module.exports = function(grunt) {
 				prereleaseName: false,
 				regExp: false
 			}
-		}
+		},
+		
+		nodewebkit: {
+			options: {
+				platforms: ['win','osx'],
+				buildDir: './build', // Where the build version of my node-webkit app is saved
+    		},
+			src: [''] // Your node-webkit app
+  		}
 	}
 
 	grunt.initConfig();

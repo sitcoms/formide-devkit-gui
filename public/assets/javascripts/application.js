@@ -34174,7 +34174,7 @@ var modules = ['ng'];
 var angularModules = [];
 
 angular.element(document).ready(function() {
-    require('nw.gui').Window.get().showDevTools();
+    //require('nw.gui').Window.get().showDevTools();
     setTimeout(function()
     { 
         modules.push('app');
@@ -35154,7 +35154,7 @@ loadModule('font_awesome',	'theme',	'./app/components/themes/font-awesome/');
 app.run(['$rootScope', '$timeout', '$file', function($rootScope, $timeout, $file) {
 	
 	// devmode
-	require('nw.gui').Window.get().showDevTools();
+	//require('nw.gui').Window.get().showDevTools();
 	
 	// set editor config
 	$file.setConfig([
