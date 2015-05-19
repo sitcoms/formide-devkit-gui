@@ -36022,6 +36022,14 @@ var SettingsController = function($scope, $rootScope, $http) {
 		$scope.settings.theme = 'dark';
 	}
 	
+	$scope.openHomepage = function() {
+		gui.Shell.openExternal($scope.settings.package.homepage);
+	}
+	
+	$scope.openIssues = function() {
+		gui.Shell.openExternal($scope.settings.package.bugs.url);
+	}
+	
 	$http.get('./package.json').success(function(data) {
         $scope.settings.package = data;
     });
