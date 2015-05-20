@@ -34034,9 +34034,9 @@ angular.module('sdk.menu', []).factory('$menu', ['$rootScope', function ($rootSc
 	
 	var factory = {};
 	
-	factory.setConfig = function( args ){
-		
-	}
+    factory.setConfig = function(config) {
+	  	$rootScope.menuConfig = config;
+    };
 	
 	return factory;
 	
@@ -34337,185 +34337,7 @@ var ApplicationController = function($scope, $rootScope, $timeout, $stoplight, $
 
 	// menu
 
-	var menuBar = new gui.Menu({
-		type: "menubar"
-	});
 	
-	if( process.platform == 'darwin' ) {	
-		menuBar.createMacBuiltin("Devkit", {
-			hideWindow: true
-		});
-	} else {
-		var menuItem = new gui.MenuItem({ label: 'File' });
-		
-		var submenu = new gui.Menu();
-			submenu.append(new gui.MenuItem({ label: 'Item 1' }));
-			submenu.append(new gui.MenuItem({ label: 'Item 2' }));
-			submenu.append(new gui.MenuItem({ label: 'Item 3' }));
-			
-		menuItem.submenu = submenu;
-		menuBar.append(menuItem);
-		
-		menuBar.append(new gui.MenuItem({ label: 'Edit' }));
-		menuBar.append(new gui.MenuItem({ label: 'View' }));
-		
-		console.log(menuBar.items)
-	}
-
-	win.menu = menuBar;
-
-	menuBar.items[0].submenu.insert( new gui.MenuItem({ type: 'separator' }), 2 );
-
-	menuBar.items[0].submenu.insert(new gui.MenuItem({
-		label: 'Preferences...',
-		click: function() {
-			$scope.$apply(function() {
-				$scope.toggleSettings();
-			});
-		},
-		key: ',',
-		modifiers: 'cmd'
-	}), 3);
-
-	// app menu
-	menuBar.items[0].submenu.insert(new gui.MenuItem({
-		label: 'Check for updates...',
-		click: function() {
-			alert('this feature will come soon...');
-		}
-	}), 1);
-
-	// file menu
-	var file = new gui.Menu();
-
-	var newMenu = new gui.MenuItem({
-		label: 'New'
-	});
-
-	var newSubmenu = new gui.Menu();
-	newSubmenu.append(new gui.MenuItem({
-		label: 'File',
-		click: function() {
-			$scope.newFile();
-		},
-		key: 'n',
-		modifiers: 'cmd'
-	}));
-	
-	newSubmenu.append(new gui.MenuItem({
-		label: 'Folder',
-		click: function() {
-			$scope.newFolder();
-		},
-		key: 'n',
-		modifiers: 'cmd+alt'
-	}));
-
-	newSubmenu.append(new gui.MenuItem({
-		label: 'Project...',
-		click: function() {
-			$rootScope.$emit('service.project.create');
-		},
-		key: 'n',
-		modifiers: 'cmd+shift'
-	}));
-
-	newMenu.submenu = newSubmenu;
-	file.insert(newMenu, 0);
-
-	file.insert(new gui.MenuItem({
-		type: 'separator'
-	}),1);
-
-	file.insert(new gui.MenuItem({
-		label: 'Open Project',
-		click: function() {
-			$rootScope.$emit('service.project.open');
-		},
-		key: 'o',
-		modifiers: 'cmd'
-	}),2);
-
-	file.insert(new gui.MenuItem({
-		type: 'separator'
-	}),3);
-
-	file.insert(new gui.MenuItem({
-		label: 'Close tab',
-		click: function() {
-			$scope.$apply(function() {
-				$file.close();
-			});
-		},
-		key: 'w',
-		modifiers: 'cmd'
-	}),4);
-
-	file.insert(new gui.MenuItem({
-		type: 'separator'
-	}),5);
-
-	file.insert(new gui.MenuItem({
-		label: 'Save',
-		click: function() {
-			$scope.$apply(function() {
-				$file.save();
-			});
-		},
-		key: 's',
-		modifiers: 'cmd'
-	}),6);
-
-	file.insert(new gui.MenuItem({
-		label: 'Save All',
-		click: function() {
-    		$rootScope.$emit('service.file.saveall');
-		},
-		key: 's',
-		modifiers: 'cmd+shift'
-	}),7);
-
-	win.menu.insert(new gui.MenuItem({
-		label: 'File',
-		submenu: file
-	}), 1);
-
-
-	// project menu
-	var project = new gui.Menu();
-
-	project.insert(new gui.MenuItem({
-		label: 'Run',
-		click: function(){
-			$rootScope.$emit('project.run');
-		},
-		key: 'r',
-		modifiers: 'cmd'
-	}), 0);
-
-	win.menu.insert(new gui.MenuItem({
-		label: 'Project',
-		submenu: project
-	}), 3);
-
-	// text menu
-	var text = new gui.Menu();
-
-	text.insert(new gui.MenuItem({
-		type: 'checkbox',
-		label: 'Wrap lines',
-		click: function(){
-
-		},
-		checked: true,
-		key: 'w',
-		modifiers: 'cmd+alt'
-	}));
-
-	win.menu.insert(new gui.MenuItem({
-		label: 'Text',
-		submenu: text
-	}), 4);
 
 }
 
@@ -34596,6 +34418,129 @@ var EditorController = function($rootScope, $scope, $file, $project, $rootScope,
 EditorController.$inject = ['$rootScope', '$scope', '$file', '$project', '$rootScope', '$timeout'];
 
 app.controller("EditorController", EditorController);;
+var gui = require('nw.gui');	
+	
+var MenuController = function($rootScope, $scope)
+{
+		
+	$scope.menu 		= $rootScope.menuConfig;
+	$scope.os 			= process.platform;
+	$scope.inlineMenu 	= false; // draw the menu in the html
+	
+	if( $scope.os == 'darwin' ) {
+		buildMenuDarwin( $scope.menu );
+	} else {
+		$scope.inlineMenu = true;
+	}
+
+	function buildMenuDarwin( menu ) {
+			
+		var win = gui.Window.get();
+			
+		var menu_darwin = drawMenuDarwin( menu, true );
+		
+		// 'app'-menu	
+		menu_darwin.items[0].submenu.insert(new gui.MenuItem({
+			label: 'Check for updates...',
+			click: function() {
+				alert('this feature will come soon...');
+				$rootScope.$emit('menu.updates');
+			}
+		}), 1);
+		menu_darwin.items[0].submenu.insert(new gui.MenuItem({
+			type: 'separator'
+		}), 2);
+		menu_darwin.items[0].submenu.insert(new gui.MenuItem({
+			label: 'Preferences...',
+			click: function() {
+				$rootScope.$emit('menu.preferences');
+			},
+			key: ',',
+			modifiers: 'cmd'
+		}), 3);
+		
+		win.menu = menu_darwin;
+		
+	}
+	
+	function drawMenuDarwin(items, root){
+			
+		root = root || false;		
+		
+		if( root ) {
+			var menu = new gui.Menu({
+				type: 'menubar'
+			});
+			menu.createMacBuiltin("Devkit");
+		} else {
+			var menu = new gui.Menu();
+		}
+		
+		var i = 0;
+		if( root ) i = 1;
+		items.forEach(function(item){
+					
+			if( item.type == 'seperator' ) {
+				 var item_ = new gui.MenuItem({ type: 'separator' });
+			} else {
+				
+				// prepare the item
+				var item_options = {
+					label: item.label,
+					click: function(){
+						$rootScope.$emit('menu.' + item.id);
+					}
+				}
+				
+				// add hotkeys, if specified
+				if( item.hotkey ) {
+					angular.extend(item_options, parseHotkey( item.hotkey ) );
+				}
+				
+				// add the item to the menu
+				var item_ = new gui.MenuItem(item_options);
+			}
+		
+			// draw a submenu, recursively
+			if( Array.isArray(item.submenu) ) {
+				item_.submenu = drawMenuDarwin( item.submenu );
+			}
+			
+			menu.insert( item_, i );
+			i++;
+			
+		});
+		
+		return menu;
+		
+	}
+	
+	function parseHotkey( hotkey ) {
+		
+		hotkey = hotkey.split('+');
+		
+		// find key (the last)
+		var key = hotkey[ hotkey.length-1 ];
+		
+		// find modifiers
+		hotkey.pop()
+		var modifiers = hotkey;
+			modifiers = modifiers.join('-');
+			if( $scope.os == 'darwin' ) modifiers = modifiers.replace('meta', 'cmd');
+			if( $scope.os == 'darwin' ) modifiers = modifiers.replace('meta', 'ctrl');
+		
+		return {
+			key			: key,
+			modifiers	: modifiers
+		}
+		
+	}
+	
+}
+
+MenuController.$inject = ['$rootScope', '$scope'];
+
+app.controller("MenuController", MenuController);;
 var gui			= require('nw.gui');
 var path		= require('path'); // auch
 
@@ -35191,7 +35136,7 @@ loadModule('font_awesome',	'theme',	'./app/components/themes/font-awesome/');
 /*
  * Use this area to define global settings for your app like the file editor config and devtools
  */
-app.run(['$rootScope', '$timeout', '$file', function($rootScope, $timeout, $file) {
+app.run(['$rootScope', '$timeout', '$file', '$menu', function($rootScope, $timeout, $file, $menu) {
 	
 	// devmode
 	//require('nw.gui').Window.get().showDevTools();
@@ -35241,6 +35186,39 @@ app.run(['$rootScope', '$timeout', '$file', function($rootScope, $timeout, $file
 			config: {
 				editor: "image"
 			}
+		}
+	]);
+	
+	$menu.setConfig([
+		{
+			id: 'file',
+			label: 'File',
+			submenu: [
+				{
+					id: 'project-new',
+					label: 'New Project...',
+					hotkey: 'meta+shift+n'
+				},
+				{
+					id: 'project-open',
+					label: 'Open Project...',
+					hotkey: 'meta+shift+o'
+				},
+				{
+					type: 'seperator'
+				},
+				{
+					id: 'file-new',
+					label: 'New File',
+					hotkey: 'meta+n',
+					submenu: [
+						{
+							id: 'foo',
+							label: 'Bar'
+						}
+					]
+				}
+			]
 		}
 	]);
 }]);;
