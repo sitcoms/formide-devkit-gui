@@ -61,7 +61,7 @@ app.run(['$rootScope', '$timeout', '$file', '$menu', function($rootScope, $timeo
 			}
 		},
 		{
-			ext: ".json",
+			base: "app.json",
 			config: {
 				editor: "manifest"
 			}
