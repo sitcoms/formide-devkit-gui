@@ -33953,8 +33953,6 @@ angular.module('sdk.file', []).factory('$file', ['$rootScope', '$http', '$timeou
 	    for (var i in $rootScope.editorConfig) {
 	    	var item = $rootScope.editorConfig[i];
 
-	    	console.log('file', file, item);
-
 	    	if(file.ext === item.ext || file.dir === item.dir || file.base === item.base) {
 	    		widgets = item.config.widgets || widgets;
 	    		editor = item.config.editor || editor;
@@ -34400,6 +34398,10 @@ var EditorController = function($rootScope, $scope, $file, $project, $rootScope,
 		$scope.active = $file.active;
 	}
 	
+	$rootScope.$on('menu.file-close', function(){
+		$scope.close();
+	});
+	
 	$rootScope.$on('service.file.open', function(){
 		$scope.update();
 	});
@@ -34426,11 +34428,10 @@ var MenuController = function($rootScope, $scope, $timeout)
 	$scope.inlineMenu 	= false; // draw the menu in the html
 	$scope.visibleMenu	= false;
 	
-	if( $scope.os == 'darwin' ) {
-		buildMenuDarwin( $scope.menu );
-		$scope.inlineMenu = true;
-	} else {
-		$scope.inlineMenu = true;
+	$scope.close = function(){
+		$scope.$apply(function(){
+			$scope.visibleMenu = false;
+		})
 	}
 	
 	$scope.click = function( item, root ) {
@@ -34444,7 +34445,8 @@ var MenuController = function($rootScope, $scope, $timeout)
 			return;
 		}
 		
-		$rootScope.$emit('menu.' + item.id);
+		emit(item.id, false);
+		
 		$timeout(function(){
 			$scope.visibleMenu = false;
 		}, 100);
@@ -34470,7 +34472,86 @@ var MenuController = function($rootScope, $scope, $timeout)
 			})
 		return modifiers.join('+') + '+' + ucfirst(hotkey.key);
 	}
+		
+	// listen to the window's focus
+	var win			= gui.Window.get();
+	var winFocus	= false;
+	var hotkeys		= [];	
 	
+    win.on('blur', function() { winFocus = false; });
+    win.on('focus', function() { winFocus = true; });
+    
+	window.addEventListener('keyup', function(e){
+			
+		var key = String.fromCharCode(e.keyCode);
+			key = key.toLowerCase();
+		
+		hotkeys.forEach(function(hotkey){
+			
+			if( hotkey.alt && !e.altKey ) return;
+			if( hotkey.ctrl && !e.ctrlKey ) return;
+			if( hotkey.shift && !e.shiftKey ) return;
+			if( hotkey.key != key ) return;
+			
+			emit(hotkey.id);			
+			
+		});
+				
+	});
+	
+	if( $scope.os == 'darwin' ) {
+		buildMenuDarwin( $scope.menu );
+		$scope.inlineMenu = true;
+	} else {
+		$scope.inlineMenu = true;
+		
+		registerHotkeys( $scope.menu );
+	}
+	
+	// emit a menu event
+	function emit( event, apply ) {
+		
+		if( typeof apply == 'undefined' ) apply = true;
+			
+		if( apply ) {			
+			$scope.$apply(function(){
+				$rootScope.$emit('menu.' + event);
+			});
+		} else {
+			$rootScope.$emit('menu.' + event);
+		}
+		
+	}
+	
+	// register hotkeys
+	function registerHotkeys( menu ) {
+				
+		menu.forEach(function(item){
+			
+			if( item.submenu ) registerHotkeys( item.submenu );
+			
+			if( !item.hotkey ) return;
+			
+			var hotkey = item.hotkey;
+				hotkey = hotkey.replace('meta', 'ctrl');
+			
+			var key = item.hotkey.split('+');
+				key = key[ key.length-1 ];
+				key = key.toLowerCase();
+			
+			hotkeys.push({
+				id		: item.id,
+				key		: key,
+				ctrl	: hotkey.indexOf('ctrl') > -1,
+				alt		: hotkey.indexOf('alt') > -1,
+				shift	: hotkey.indexOf('shift') > -1
+			});
+			
+		});
+		
+	}
+	
+	// return a string with the first letter as uppercase
 	function ucfirst( text ) {
 		
 		if( text.length == 1 ) {
@@ -34492,7 +34573,7 @@ var MenuController = function($rootScope, $scope, $timeout)
 			label: 'Check for updates...',
 			click: function() {
 				alert('this feature will come soon...');
-				$rootScope.$emit('menu.updates');
+				emit('updates');
 			}
 		}), 1);
 		menu_darwin.items[0].submenu.insert(new gui.MenuItem({
@@ -34501,7 +34582,7 @@ var MenuController = function($rootScope, $scope, $timeout)
 		menu_darwin.items[0].submenu.insert(new gui.MenuItem({
 			label: 'Preferences...',
 			click: function() {
-				$rootScope.$emit('menu.preferences');
+				emit('preferences');
 			},
 			key: ',',
 			modifiers: 'cmd'
@@ -34519,9 +34600,7 @@ var MenuController = function($rootScope, $scope, $timeout)
 			var menu = new gui.Menu({
 				type: 'menubar'
 			});
-			menu.createMacBuiltin("Devkit", {
-				edit: false
-			});
+			menu.createMacBuiltin("Devkit");
 		} else {
 			var menu = new gui.Menu();
 		}
@@ -34529,16 +34608,24 @@ var MenuController = function($rootScope, $scope, $timeout)
 		var i = 0;
 		if( root ) i = 1;
 		items.forEach(function(item){
-					
+			
+			var position = i;
+			
 			if( item.type == 'separator' ) {
 				 var item_ = new gui.MenuItem({ type: 'separator' });
 			} else {
+				
+				// skip edit on OSX
+				if( root && item.id == 'edit' ) {
+					i++;
+					return;
+				};
 				
 				// prepare the item
 				var item_options = {
 					label: item.label,
 					click: function(){
-						$rootScope.$emit('menu.' + item.id);
+						emit(item.id);
 					}
 				}
 				
@@ -34556,7 +34643,7 @@ var MenuController = function($rootScope, $scope, $timeout)
 				item_.submenu = drawMenuDarwin( item.submenu );
 			}
 			
-			menu.insert( item_, i );
+			menu.insert( item_, position );
 			i++;
 			
 		});
@@ -34577,7 +34664,7 @@ var MenuController = function($rootScope, $scope, $timeout)
 		var modifiers = hotkey;
 			modifiers = modifiers.join('-');
 			if( $scope.os == 'darwin' ) modifiers = modifiers.replace('meta', 'cmd');
-			if( $scope.os == 'darwin' ) modifiers = modifiers.replace('meta', 'ctrl');
+			if( $scope.os != 'darwin' ) modifiers = modifiers.replace('meta', 'ctrl');
 		
 		return {
 			key			: key,
@@ -34685,8 +34772,6 @@ var SidebarController = function($scope, $rootScope, $file, $timeout, $project) 
         }
 
         $scope.selectedIndex = index;
-
-        console.log(index, $scope.filetree[0].children[index]);
 	}
 
 	/*
@@ -34794,7 +34879,7 @@ var SidebarController = function($scope, $rootScope, $file, $timeout, $project) 
 	 */
 	$scope.open = function(filePath) {
 		if(fs_extra.lstatSync(filePath).isDirectory()) {
-            $scope.expanded.push(path);
+            $scope.expand(filePath, !$scope.isExpanded(filePath));
         }
         else {
             $file.open(filePath);
@@ -34807,7 +34892,6 @@ var SidebarController = function($scope, $rootScope, $file, $timeout, $project) 
 	$scope.update = function() {
 		$scope.filetree = readdirSyncRecursive( $scope.$parent.path, true ); // $parent is ApplicationController
 	}
-	
 	
 	$scope.dragoverCallback = function(event, index, external) {
         return index > 0;
@@ -34865,13 +34949,12 @@ var SidebarController = function($scope, $rootScope, $file, $timeout, $project) 
 		
 		// Add some items
 		if( item ) {
+			
 			// multiple selection
-			if( $scope.isSelected(item.path) ) {
-				if( event.metaKey || event.ctrlKey ) {
-					$scope.selected.push( item.path );
-				} else {
-					$scope.selected = [ item.path ];
-				}
+			if( event.metaKey || event.ctrlKey ) {
+				$scope.selected.push( item.path );
+			} else {
+				 $scope.selected = [ item.path ];
 			}
 			
 			ctxmenu.append(new gui.MenuItem({ label: 'Open', click: function(){
@@ -35105,6 +35188,7 @@ app.directive('ngRightClick', function($parse) {
         element.bind('contextmenu', function(event) {
             scope.$apply(function() {
                 event.preventDefault();
+                event.stopPropagation();
                 fn(scope, {$event:event});
             });
         });
@@ -35145,7 +35229,44 @@ app.directive('showFocus', function($timeout) {
         });
       },true);
   };    
-});;
+});
+
+app.directive('clickOutside', ['$document', function($document) {
+    return {
+        restrict: 'A',
+        scope: {
+            clickOutside: '&'
+        },
+        link: function ($scope, elem, attr) {
+            var classList = (attr.outsideIfNot !== undefined) ? attr.outsideIfNot.replace(', ', ',').split(',') : [];
+            if (attr.id !== undefined) classList.push(attr.id);
+
+            $document.on('click', function (e) {
+                var i = 0,
+                    element;
+
+                if (!e.target) return;
+
+                for (element = e.target; element; element = element.parentNode) {
+                    var id = element.id;
+                    var classNames = element.className;
+
+                    if (id !== undefined) {
+                        for (i = 0; i < classList.length; i++) {
+                            if (id.indexOf(classList[i]) > -1 || classNames.indexOf(classList[i]) > -1) {
+                                return;
+                            }
+                        }
+                    }
+                }
+
+                $scope.$eval($scope.clickOutside);
+            });
+        }
+    };
+}]);
+
+    ;
 /*
  * Use this area to load your modules. Some module have been pre-loaded for you like codemirror, some widgets and custom icons
  */

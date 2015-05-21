@@ -148,16 +148,14 @@ var FormideUploadController = function($scope, $rootScope, $file, $project) {
 				if(response.success) {
 					$scope.status = "uploaded";
 					$scope.message = "";
+					manifest.version = semver.inc(manifest.version, 'patch');
+					fs.writeFileSync(window.localStorage.project_dir + '/app.json', JSON.stringify(manifest), 'utf8');
 				}
 				else {
 					$scope.status = "failed";
 					$scope.message = response.message;
-
 					alert('Failed ' + response.message);
 				}
-				
-                manifest.version = semver.inc(manifest.version, 'patch');
-				fs.writeFileSync(window.localStorage.project_dir + '/app.json', JSON.stringify(manifest), 'utf8');
 				
 				fs.unlink(zipFile);
 				$scope.$apply();

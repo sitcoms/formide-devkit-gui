@@ -9,13 +9,8 @@
 		</row>
 		
 		<row>
-			<label>Name</label>
+			<label>Display name</label>
 			<input type="text" ng-model="manifest.name" placeholder="Your app name" />
-		</row>
-
-		<row>
-			<label>Description</label>
-			<textarea ng-model="manifest.description" placeholder="Your app description" ></textarea>
 		</row>
 
 		<row>
@@ -36,6 +31,17 @@
 		<row>
 			<label>Author's e-mail</label>
 			<input type="text" ng-model="manifest.author.email" placeholder="a.uthor@gmail.com" />
+		</row>
+
+	</fieldset>
+	
+	<fieldset>
+		<legend>Icon</legend>
+
+		<row>
+			<img ng-src="{{ imagePath }}" width="128px" />
+			<img ng-src="{{ imagePath }}" width="64px" />
+			<img ng-src="{{ imagePath }}" width="32px" />
 		</row>
 
 	</fieldset>

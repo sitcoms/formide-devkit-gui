@@ -2,9 +2,11 @@ var fs 		= require('fs-extra');
 var path 	= require('path');
 var semver	= require('semver');
 
-app.controller("manifestViewCtrl", function( $scope, $rootScope, $http, $q, $events, $timeout ){
+app.controller("manifestViewCtrl", function( $scope, $rootScope, $http, $q, $events, $timeout, $project){
 
 	$scope.manifest = angular.fromJson( $scope.file.code );
+	$scope.projectPath = $project.getPath();
+	$scope.imagePath = $scope.projectPath + '/icon.png';
 	var code;
 
 	var hook = Hook('global');
