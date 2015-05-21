@@ -4,7 +4,7 @@ var archiver 		= require('archiver');
 var request			= require('request');
 var semver			= require('semver');
 
-var FormideUploadController = function($scope, $rootScope, $file) {
+var FormideUploadController = function($scope, $rootScope, $file, $project) {
 	
 	$scope.status = "idle";
 	$scope.manifest = "";
@@ -21,11 +21,19 @@ var FormideUploadController = function($scope, $rootScope, $file) {
     };
 
 	var hook = Hook('global');
+
+	if($project.getPath()) {
+		var manifest = JSON.parse(fs.readFileSync($project.getPath() + '/app.json', 'utf8'));
+
+		$scope.manifest = manifest;
+	}
 	
-	var manifest = JSON.parse(fs.readFileSync(window.localStorage.project_dir + '/app.json', 'utf8'));
+	$rootScope.$on('service.project.ready', function() {
+		var manifest = JSON.parse(fs.readFileSync($project.getPath() + '/app.json', 'utf8'));
 
-	$scope.manifest = manifest;
-
+		$scope.manifest = manifest;
+	});
+	
 	hook.register('onManifestSave',
 		function (e) {
 	        fs.readFile(window.localStorage.project_dir + '/app.json', 'utf8', function read(err, data) {
@@ -171,6 +179,6 @@ var FormideUploadController = function($scope, $rootScope, $file) {
     });
 };
 
-FormideUploadController.$inject = ['$scope', '$rootScope', '$file'];
+FormideUploadController.$inject = ['$scope', '$rootScope', '$file', '$project'];
 
 app.controller("FormideUploadController", FormideUploadController);

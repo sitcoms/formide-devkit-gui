@@ -1,3 +1,10 @@
+if(window.localStorage.sdk_settings) {
+	document.getElementsByTagName('html')[0].className = JSON.parse(window.localStorage.sdk_settings)['theme'];
+}
+else {
+	document.getElementsByTagName('html')[0].className = 'dark';
+}
+
 document.getElementsByTagName('html')[0].className = JSON.parse(window.localStorage.sdk_settings)['theme'];
 
 var SettingsController = function($scope, $rootScope, $http) {

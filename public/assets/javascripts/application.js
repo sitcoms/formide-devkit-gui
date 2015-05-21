@@ -34112,9 +34112,8 @@ angular.module('sdk.project', []).factory('$project', ['$rootScope', function ($
 			return window.localStorage.project_dir;
 		}
 		else {
-			return '';
+			return false;
 		}
-		
 	}
 
 	factory.setPath = function(path) {
@@ -34128,7 +34127,7 @@ angular.module('sdk.project', []).factory('$project', ['$rootScope', function ($
 			return window.localStorage.files_open.split(',');
 		}
 		else {
-			return [''];
+			return false;
 		}
 	}
 
@@ -34137,7 +34136,6 @@ angular.module('sdk.project', []).factory('$project', ['$rootScope', function ($
 
 		return true;
 	}
-
 
     return factory;
 }]);;
@@ -34420,17 +34418,67 @@ EditorController.$inject = ['$rootScope', '$scope', '$file', '$project', '$rootS
 app.controller("EditorController", EditorController);;
 var gui = require('nw.gui');	
 	
-var MenuController = function($rootScope, $scope)
+var MenuController = function($rootScope, $scope, $timeout)
 {
 		
 	$scope.menu 		= $rootScope.menuConfig;
 	$scope.os 			= process.platform;
 	$scope.inlineMenu 	= false; // draw the menu in the html
+	$scope.visibleMenu	= false;
 	
 	if( $scope.os == 'darwin' ) {
 		buildMenuDarwin( $scope.menu );
+		$scope.inlineMenu = true;
 	} else {
 		$scope.inlineMenu = true;
+	}
+	
+	$scope.click = function( item, root ) {
+		
+		if( root ) {
+			if( $scope.visibleMenu == item.id ) {
+				$scope.visibleMenu = false;
+			} else {
+				$scope.visibleMenu = item.id;
+			}
+			return;
+		}
+		
+		$rootScope.$emit('menu.' + item.id);
+		$timeout(function(){
+			$scope.visibleMenu = false;
+		}, 100);
+	}
+	
+	$scope.mouseover = function( item, root ) {
+		if( root ) {
+			if( $scope.visibleMenu !== false ) {
+				$scope.visibleMenu = item.id;
+			}
+		}
+	}
+	
+	$scope.formatHotkey = function( item ) {
+		
+		if( !item.hotkey ) return '';
+		
+		var hotkey = parseHotkey( item.hotkey );
+		
+		var modifiers = hotkey.modifiers.split('-');
+			modifiers = modifiers.map(function(modifier){
+				return ucfirst(modifier);
+			})
+		return modifiers.join('+') + '+' + ucfirst(hotkey.key);
+	}
+	
+	function ucfirst( text ) {
+		
+		if( text.length == 1 ) {
+			return text.toUpperCase();
+		} else {
+			return text.charAt(0).toUpperCase() + text.substring(1);
+		}
+		
 	}
 
 	function buildMenuDarwin( menu ) {
@@ -34471,7 +34519,9 @@ var MenuController = function($rootScope, $scope)
 			var menu = new gui.Menu({
 				type: 'menubar'
 			});
-			menu.createMacBuiltin("Devkit");
+			menu.createMacBuiltin("Devkit", {
+				edit: false
+			});
 		} else {
 			var menu = new gui.Menu();
 		}
@@ -34480,7 +34530,7 @@ var MenuController = function($rootScope, $scope)
 		if( root ) i = 1;
 		items.forEach(function(item){
 					
-			if( item.type == 'seperator' ) {
+			if( item.type == 'separator' ) {
 				 var item_ = new gui.MenuItem({ type: 'separator' });
 			} else {
 				
@@ -34538,7 +34588,7 @@ var MenuController = function($rootScope, $scope)
 	
 }
 
-MenuController.$inject = ['$rootScope', '$scope'];
+MenuController.$inject = ['$rootScope', '$scope', '$timeout'];
 
 app.controller("MenuController", MenuController);;
 var gui			= require('nw.gui');
@@ -34559,8 +34609,11 @@ var SidebarController = function($scope, $rootScope, $file, $timeout, $project) 
 	
 	$scope.init = function() {
 		// load previous project, if available
-		if(typeof $project.getPath() == 'string') {
+		if($project.getPath()) {
 			$scope.loadProject($project.getPath());
+		}
+		else {
+			$scope.selectProject();
 		}
 	}
 	
@@ -35865,7 +35918,7 @@ var archiver 		= require('archiver');
 var request			= require('request');
 var semver			= require('semver');
 
-var FormideUploadController = function($scope, $rootScope, $file) {
+var FormideUploadController = function($scope, $rootScope, $file, $project) {
 	
 	$scope.status = "idle";
 	$scope.manifest = "";
@@ -35882,11 +35935,19 @@ var FormideUploadController = function($scope, $rootScope, $file) {
     };
 
 	var hook = Hook('global');
+
+	if($project.getPath()) {
+		var manifest = JSON.parse(fs.readFileSync($project.getPath() + '/app.json', 'utf8'));
+
+		$scope.manifest = manifest;
+	}
 	
-	var manifest = JSON.parse(fs.readFileSync(window.localStorage.project_dir + '/app.json', 'utf8'));
+	$rootScope.$on('service.project.ready', function() {
+		var manifest = JSON.parse(fs.readFileSync($project.getPath() + '/app.json', 'utf8'));
 
-	$scope.manifest = manifest;
-
+		$scope.manifest = manifest;
+	});
+	
 	hook.register('onManifestSave',
 		function (e) {
 	        fs.readFile(window.localStorage.project_dir + '/app.json', 'utf8', function read(err, data) {
@@ -36032,7 +36093,7 @@ var FormideUploadController = function($scope, $rootScope, $file) {
     });
 };
 
-FormideUploadController.$inject = ['$scope', '$rootScope', '$file'];
+FormideUploadController.$inject = ['$scope', '$rootScope', '$file', '$project'];
 
 app.controller("FormideUploadController", FormideUploadController);;
 var LoginController = function($scope, $rootScope) {
@@ -36043,6 +36104,13 @@ var LoginController = function($scope, $rootScope) {
 LoginController.$inject = ['$scope', '$rootScope'];
 
 app.controller("LoginController", LoginController);;
+if(window.localStorage.sdk_settings) {
+	document.getElementsByTagName('html')[0].className = JSON.parse(window.localStorage.sdk_settings)['theme'];
+}
+else {
+	document.getElementsByTagName('html')[0].className = 'dark';
+}
+
 document.getElementsByTagName('html')[0].className = JSON.parse(window.localStorage.sdk_settings)['theme'];
 
 var SettingsController = function($scope, $rootScope, $http) {
