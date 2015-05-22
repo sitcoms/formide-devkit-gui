@@ -15,6 +15,7 @@ loadModule('markdown', 		'widget',	'./core/components/widgets/devkit-widget-mark
 // nope..
 
 // themes
+// nope..
 
 // APP
 // editors
@@ -44,7 +45,7 @@ loadModule('font_awesome',	'theme',	'./app/components/themes/font-awesome/');
 app.run(['$rootScope', '$timeout', '$file', '$menu', function($rootScope, $timeout, $file, $menu) {
 	
 	// devmode
-	//require('nw.gui').Window.get().showDevTools();
+	require('nw.gui').Window.get().showDevTools();
 	
 	// set editor config
 	$file.setConfig([
@@ -110,18 +111,27 @@ app.run(['$rootScope', '$timeout', '$file', '$menu', function($rootScope, $timeo
 					hotkey: 'meta+shift+o'
 				},
 				{
-					type: 'seperator'
-				},
-				{
 					id: 'file-new',
 					label: 'New File',
 					hotkey: 'meta+n',
-					submenu: [
-						{
-							id: 'foo',
-							label: 'Bar'
-						}
-					]
+				}
+			]
+		},
+		{
+			id: 'run',
+			label: 'Run',
+			submenu: [
+				{
+					id: 'preview',
+					label: 'Local preview'
+				},
+				{
+					id: 'upload',
+					label: 'Publish'
+				},
+				{
+					id: 'manager',
+					label: 'View in manager'
 				}
 			]
 		}

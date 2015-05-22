@@ -112,6 +112,8 @@
         border: 1px solid #46B1E6; }
         .light tabs tab.changed .close:before {
           color: #46B1E6; }
+  .light editorviews {
+    background: #EFF1F5; }
   .light widgets {
     padding-left: 8px;
     padding-right: 8px;

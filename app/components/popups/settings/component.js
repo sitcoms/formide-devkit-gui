@@ -1,11 +1,9 @@
 if(window.localStorage.sdk_settings) {
-	document.getElementsByTagName('html')[0].className = JSON.parse(window.localStorage.sdk_settings)['theme'];
+	document.getElementsByTagName('wrap')[0].className = JSON.parse(window.localStorage.sdk_settings)['theme'];
 }
 else {
-	document.getElementsByTagName('html')[0].className = 'dark';
+	document.getElementsByTagName('wrap')[0].className = 'dark';
 }
-
-document.getElementsByTagName('html')[0].className = JSON.parse(window.localStorage.sdk_settings)['theme'];
 
 var SettingsController = function($scope, $rootScope, $http) {
 	
@@ -35,7 +33,7 @@ var SettingsController = function($scope, $rootScope, $http) {
     });
     
     $scope.applyTheme = function() {
-	    document.getElementsByTagName('html')[0].className = $scope.settings.theme;
+	    document.getElementsByTagName('wrap')[0].className = $scope.settings.theme;
     }
 
 	$scope.$watch('settings', function(newVal, oldVal){

@@ -184,6 +184,10 @@ $codemirror-green: desaturate(#61E646, 15%);
 			}
 		}
 	}
+	
+	editorviews {
+		background: $background-color;
+	}
 
 	widgets {
 		padding-left: 8px;

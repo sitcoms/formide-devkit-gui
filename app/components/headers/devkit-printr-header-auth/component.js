@@ -14,6 +14,10 @@ var AuthController = function($scope, $rootScope, $http, $popup)
 		}
 	};
 	
+	$rootScope.$on('menu.preferences', function(e) {
+		$popup.open('settings', $scope);	
+	});
+	
 	$scope.settings = function() {
 		$popup.open('settings', $scope);	
 	};

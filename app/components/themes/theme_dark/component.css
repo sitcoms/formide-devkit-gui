@@ -112,6 +112,8 @@
         border: 1px solid #46B1E6; }
         .dark tabs tab.changed .close:before {
           color: #46B1E6; }
+  .dark editorviews {
+    background: #2B303B; }
   .dark widgets {
     padding-left: 8px;
     padding-right: 8px;

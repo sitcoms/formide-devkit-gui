@@ -33945,15 +33945,21 @@ angular.module('sdk.file', []).factory('$file', ['$rootScope', '$http', '$timeou
     {
 	    // determine the view.
 	    var file = path.parse( file_path );
-
+	    file.dir = file.dir.replace( $project.getPath(), '' );
+	    file.dir += '/';
+	    
 	    // default to codemirror
 	    var editor = 'codemirror';
 	    var widgets = [];
 
 	    for (var i in $rootScope.editorConfig) {
 	    	var item = $rootScope.editorConfig[i];
-
-	    	if(file.ext === item.ext || file.dir === item.dir || file.base === item.base) {
+	    	
+	    	if(
+	    		( typeof item.ext == 'undefined'	|| file.ext === item.ext ) &&
+	    		( typeof item.dir == 'undefined'	|| file.dir === item.dir ) &&
+	    		( typeof item.base == 'undefined'	|| file.base === item.base )
+	    	) {
 	    		widgets = item.config.widgets || widgets;
 	    		editor = item.config.editor || editor;
 
@@ -34176,7 +34182,6 @@ var modules = ['ng'];
 var angularModules = [];
 
 angular.element(document).ready(function() {
-    require('nw.gui').Window.get().showDevTools();
     setTimeout(function()
     { 
         modules.push('app');
@@ -34238,7 +34243,11 @@ var ApplicationController = function($scope, $rootScope, $timeout, $stoplight, $
 
 	var hook = Hook('global');
 
-	$scope.loaded = false;
+	// TODO: dynamically
+	$timeout(function(){
+		$scope.loaded = true;
+	}, 700);
+	
 	$scope.platform = os.platform();
 
 	$scope.focus = true;
@@ -34283,11 +34292,16 @@ var ApplicationController = function($scope, $rootScope, $timeout, $stoplight, $
     	$file.close( file_path );
     }
 
-	// safe file
+	// save file
 	$scope.file.save = function()
 	{
     	$file.save();
     }
+    
+    // save file through menu
+    $rootScope.$on('menu.save', function(){
+	   $scope.file.save(); 
+    });
 
 	// get file info
 	$scope.file.getInfo = function(file_path)
@@ -34300,11 +34314,6 @@ var ApplicationController = function($scope, $rootScope, $timeout, $stoplight, $
 	{
     	$file.icon(file_path);
     }
-    
-	window.addEventListener('load', function()
-	{
-		$scope.loaded = true;
-	});
 
     /* TODO: Merge this somehow, make it more elegeant*/
 
@@ -34326,14 +34335,7 @@ var ApplicationController = function($scope, $rootScope, $timeout, $stoplight, $
 	window.addEventListener('focus', function() 
 	{
 		$scope.setFocus(true);
-	});
-
-
-	/* TODO: Make a service of this, that generates a menubar based on a JSON input. */
-
-	// menu
-
-	
+	});	
 
 }
 
@@ -35049,11 +35051,17 @@ var SidebarController = function($scope, $rootScope, $file, $timeout, $project) 
 	$rootScope.$on('service.project.create', function() {
 		$scope.createProject();
 	});
+	$rootScope.$on('menu.project-new', function() {
+		$scope.createProject();
+	});
 	
 	/*
 	 * Listen to open new project event
 	 */
 	$rootScope.$on('service.project.open', function() {
+		$scope.selectProject();
+	});
+	$rootScope.$on('menu.project-open', function() {
 		$scope.selectProject();
 	});
 	
@@ -35063,11 +35071,17 @@ var SidebarController = function($scope, $rootScope, $file, $timeout, $project) 
 	$rootScope.$on('service.project.new.file', function() {
 		$scope.newFile();
 	});
+	$rootScope.$on('menu.file-new', function() {
+		$scope.newFile();
+	});
 	
 	/*
 	 * Listen to new folder event
 	 */
 	$rootScope.$on('service.project.new.folder', function() {
+		$scope.newFolder();
+	});
+	$rootScope.$on('menu.folder-new', function() {
 		$scope.newFolder();
 	});
 
@@ -35284,6 +35298,7 @@ loadModule('markdown', 		'widget',	'./core/components/widgets/devkit-widget-mark
 // nope..
 
 // themes
+// nope..
 
 // APP
 // editors
@@ -35313,7 +35328,7 @@ loadModule('font_awesome',	'theme',	'./app/components/themes/font-awesome/');
 app.run(['$rootScope', '$timeout', '$file', '$menu', function($rootScope, $timeout, $file, $menu) {
 	
 	// devmode
-	//require('nw.gui').Window.get().showDevTools();
+	require('nw.gui').Window.get().showDevTools();
 	
 	// set editor config
 	$file.setConfig([
@@ -35379,18 +35394,27 @@ app.run(['$rootScope', '$timeout', '$file', '$menu', function($rootScope, $timeo
 					hotkey: 'meta+shift+o'
 				},
 				{
-					type: 'seperator'
-				},
-				{
 					id: 'file-new',
 					label: 'New File',
 					hotkey: 'meta+n',
-					submenu: [
-						{
-							id: 'foo',
-							label: 'Bar'
-						}
-					]
+				}
+			]
+		},
+		{
+			id: 'run',
+			label: 'Run',
+			submenu: [
+				{
+					id: 'preview',
+					label: 'Local preview'
+				},
+				{
+					id: 'upload',
+					label: 'Publish'
+				},
+				{
+					id: 'manager',
+					label: 'View in manager'
 				}
 			]
 		}
@@ -35943,6 +35967,10 @@ var AuthController = function($scope, $rootScope, $http, $popup)
 		}
 	};
 	
+	$rootScope.$on('menu.preferences', function(e) {
+		$popup.open('settings', $scope);	
+	});
+	
 	$scope.settings = function() {
 		$popup.open('settings', $scope);	
 	};
@@ -36226,13 +36254,11 @@ LoginController.$inject = ['$scope', '$rootScope'];
 
 app.controller("LoginController", LoginController);;
 if(window.localStorage.sdk_settings) {
-	document.getElementsByTagName('html')[0].className = JSON.parse(window.localStorage.sdk_settings)['theme'];
+	document.getElementsByTagName('wrap')[0].className = JSON.parse(window.localStorage.sdk_settings)['theme'];
 }
 else {
-	document.getElementsByTagName('html')[0].className = 'dark';
+	document.getElementsByTagName('wrap')[0].className = 'dark';
 }
-
-document.getElementsByTagName('html')[0].className = JSON.parse(window.localStorage.sdk_settings)['theme'];
 
 var SettingsController = function($scope, $rootScope, $http) {
 	
@@ -36262,7 +36288,7 @@ var SettingsController = function($scope, $rootScope, $http) {
     });
     
     $scope.applyTheme = function() {
-	    document.getElementsByTagName('html')[0].className = $scope.settings.theme;
+	    document.getElementsByTagName('wrap')[0].className = $scope.settings.theme;
     }
 
 	$scope.$watch('settings', function(newVal, oldVal){
