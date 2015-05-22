@@ -1,5 +1,5 @@
 # What is this?
-This projec's goal is to create a development kit fully based on nw.js (previously node-webkit) and angular.js.
+This project's goal is to create a development kit fully based on nw.js (previously node-webkit) and angular.js.
 
 This project is currently actively maintained by [Athom](https://github.com/athombv/) and [PRINTR](https://github.com/PRINTR3D).
 
