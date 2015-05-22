@@ -17,6 +17,9 @@
 		font-size: 14px;
 		margin: 0 6px;
 	}
+	.dark .devkit-printr-header-auth .name {
+		color: #e3e3e3;
+	}
 	.devkit-printr-header-auth > div:hover {
 		cursor: pointer;
 	}
