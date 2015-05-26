@@ -33947,6 +33947,7 @@ angular.module('sdk.file', []).factory('$file', ['$rootScope', '$http', '$timeou
 	    var file = path.parse( file_path );
 	    file.dir = file.dir.replace( $project.getPath(), '' );
 	    file.dir += '/';
+	    file.dir = file.dir.replace('\\', '/')
 	    
 	    // default to codemirror
 	    var editor = 'codemirror';
@@ -34126,6 +34127,12 @@ angular.module('sdk.project', []).factory('$project', ['$rootScope', function ($
 		return true;
 	}
 
+	factory.clearPath = function() {
+		delete window.localStorage.project_dir;
+
+		return true;
+	}
+
 	factory.getOpenFiles = function() {
 		if(window.localStorage.files_open) {
 			return window.localStorage.files_open.split(',');
@@ -34137,6 +34144,12 @@ angular.module('sdk.project', []).factory('$project', ['$rootScope', function ($
 
 	factory.setOpenFiles = function(files) {
 		window.localStorage.files_open = files.join(',');
+
+		return true;
+	}
+
+	factory.clearOpenFiles = function(files) {
+		delete window.localStorage.files_open;
 
 		return true;
 	}
@@ -34176,6 +34189,8 @@ angular.module('sdk.stoplight', [])
 }]);;
 window.ondragover = function(e) { e.preventDefault(); return false };
 window.ondrop = function(e) { e.preventDefault(); return false };
+
+require('events').EventEmitter.defaultMaxListeners = 0;
 
 var app = angular.module('app', ['module.core', 'module.modules']);
 var modules = ['ng'];
@@ -34431,6 +34446,9 @@ var MenuController = function($rootScope, $scope, $timeout)
 	$scope.visibleMenu	= false;
 	
 	$scope.close = function(){
+		
+		if( !$scope.inlineMenu ) return;
+		
 		$scope.$apply(function(){
 			$scope.visibleMenu = false;
 		})
@@ -34503,7 +34521,6 @@ var MenuController = function($rootScope, $scope, $timeout)
 	
 	if( $scope.os == 'darwin' ) {
 		buildMenuDarwin( $scope.menu );
-		$scope.inlineMenu = true;
 	} else {
 		$scope.inlineMenu = true;
 		
@@ -34574,7 +34591,6 @@ var MenuController = function($rootScope, $scope, $timeout)
 		menu_darwin.items[0].submenu.insert(new gui.MenuItem({
 			label: 'Check for updates...',
 			click: function() {
-				alert('this feature will come soon...');
 				emit('updates');
 			}
 		}), 1);
@@ -34688,21 +34704,25 @@ var fs_extra	= require('fs-extra');
 var trash		= require('trash');
 var watchTree 	= require("fs-watch-tree").watchTree;
 
+var Gaze 		= require('gaze').Gaze;
+var sane		= require('sane');
+
 var SidebarController = function($scope, $rootScope, $file, $timeout, $project) {
 	
+	$scope.projectLoaded = false;
 	$scope.selected = [];
 	$scope.renaming = false;
 	$scope.expanded = [];
 	$scope.filetree = {};
 	$scope.selectedIndex = 0;
 	
+	//var watch;
+	var watcher;
+	
 	$scope.init = function() {
 		// load previous project, if available
 		if($project.getPath()) {
 			$scope.loadProject($project.getPath());
-		}
-		else {
-			$scope.selectProject();
 		}
 	}
 	
@@ -34725,7 +34745,16 @@ var SidebarController = function($scope, $rootScope, $file, $timeout, $project) 
 	$scope.selectProject = function() {
         var directorychooser = document.getElementById('directorychooser');
         directorychooser.addEventListener("change", function(evt) {
-            $scope.loadProject(this.value);
+	        	        
+	        var path = this.value;            
+            directorychooser.value = '';
+            
+            if( path == '' ) return;
+	        
+	        $scope.$apply(function(){
+	            $scope.loadProject(path);
+            });
+            
         }, false)
         directorychooser.click();
 	}
@@ -34734,23 +34763,76 @@ var SidebarController = function($scope, $rootScope, $file, $timeout, $project) 
 	 * load a project
 	 */
 	$scope.loadProject = function(rootPath) {
+				
+		$scope.closeProject();
+		
 		$project.setPath(rootPath);
 		
         $scope.$parent.path = rootPath;
         
-        // filetree
-		// watch for changes
-		watchTree($scope.$parent.path, function (event) { // $parent is ApplicationController
+        // filetree, watch for changes
+/*
+		watch = watchTree($scope.$parent.path, function (event) { // $parent is ApplicationController
+			$scope.$apply(function() {
+				$scope.update();
+			});
+		});
+*/
+		
+		
+		//gaze = new Gaze($scope.$parent.path + '/**/*'); // $parent is ApplicationController
+		
+		watcher = sane($scope.$parent.path, {glob: ['**/*']});
+		
+/*
+		gaze.on('rename', function(newPath, oldPath) {
+			console.log(newPath);
+			console.log(oldPath);
+			gaze.add(newPath, function() {
+				
+			});
+			gaze.remove(oldPath, function() {
+				
+			});
+			$scope.$apply(function() {
+				$scope.update();
+			});
+		});
+*/
+		
+		watcher.on('all', function(event, filepath) {
+			console.log(event);
 			$scope.$apply(function() {
 				$scope.update();
 			});
 		});
 
 		$scope.$parent.files = {};
+        $scope.projectLoaded = true;
 	
 		// initial scan
 		$scope.update();
         $rootScope.$emit('service.project.ready');
+	}
+	
+	/*
+	 * close a project
+	 */
+	$scope.closeProject = function(){
+		
+		if( !$scope.projectLoaded ) return;
+		
+		$project.clearPath();
+		$project.clearOpenFiles();
+		$scope.projectLoaded = false;
+		
+        $scope.$parent.path = false;
+		$scope.$parent.files = {};
+		
+		watcher.close();
+		
+        $rootScope.$emit('service.project.closed');
+		
 	}
 
 	/*
@@ -35063,6 +35145,13 @@ var SidebarController = function($scope, $rootScope, $file, $timeout, $project) 
 	});
 	$rootScope.$on('menu.project-open', function() {
 		$scope.selectProject();
+	});
+	
+	/*
+	 * Listen to close project event
+	 */
+	$rootScope.$on('menu.project-close', function() {
+		$scope.closeProject();
 	});
 	
 	/*
