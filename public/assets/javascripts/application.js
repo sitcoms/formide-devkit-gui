@@ -29929,13 +29929,6 @@ angular.module('ngSanitize').filter('linky', ['$sanitize', function($sanitize) {
 
 })(window, window.angular);
 ;
-/**
- * angular-ui-codemirror - This directive allows you to add CodeMirror to your textarea elements.
- * @version v0.3.0 - 2015-05-03
- * @link http://angular-ui.github.com
- * @license MIT
- */
-"use strict";function uiCodemirrorDirective(a,b){function c(a,c,h,i){var j=angular.extend({value:c.text()},b.codemirror||{},a.$eval(h.uiCodemirror),a.$eval(h.uiCodemirrorOpts)),k=d(c,j);e(k,h.uiCodemirror||h.uiCodemirrorOpts,a),f(k,i,a),g(k,h.uiRefresh,a),a.$on("CodeMirror",function(a,b){if(!angular.isFunction(b))throw new Error("the CodeMirror event requires a callback function");b(k)}),angular.isFunction(j.onLoad)&&j.onLoad(k)}function d(a,b){var c;return"TEXTAREA"===a[0].tagName?c=window.CodeMirror.fromTextArea(a[0],b):(a.html(""),c=new window.CodeMirror(function(b){a.append(b)},b)),c}function e(a,b,c){function d(b,c){angular.isObject(b)&&e.forEach(function(d){if(b.hasOwnProperty(d)){if(c&&b[d]===c[d])return;a.setOption(d,b[d])}})}if(b){var e=Object.keys(window.CodeMirror.defaults);c.$watch(b,d,!0)}}function f(a,b,c){b&&(b.$formatters.push(function(a){if(angular.isUndefined(a)||null===a)return"";if(angular.isObject(a)||angular.isArray(a))throw new Error("ui-codemirror cannot use an object or an array as a model");return a}),b.$render=function(){var c=b.$viewValue||"";a.setValue(c)},a.on("change",function(a){var d=a.getValue();d!==b.$viewValue&&c.$evalAsync(function(){b.$setViewValue(d)})}))}function g(b,c,d){c&&d.$watch(c,function(c,d){c!==d&&a(function(){b.refresh()})})}return{restrict:"EA",require:"?ngModel",compile:function(){if(angular.isUndefined(window.CodeMirror))throw new Error("ui-codemirror needs CodeMirror to work... (o rly?)");return c}}}angular.module("ui.codemirror",[]).constant("uiCodemirrorConfig",{}).directive("uiCodemirror",uiCodemirrorDirective),uiCodemirrorDirective.$inject=["$timeout","uiCodemirrorConfig"];;
 /*! 
  * angular-hotkeys v1.4.5
  * https://chieffancypants.github.io/angular-hotkeys
@@ -33765,6 +33758,13 @@ angularLocalStorage.provider('localStorageService', function() {
 })( window, window.angular );;
 angular.module("dndLists",[]).directive("dndDraggable",["$parse","$timeout","dndDropEffectWorkaround","dndDragTypeWorkaround",function(e,t,n,r){return function(i,s,o){s.attr("draggable","true");if(o.dndDisableIf){i.$watch(o.dndDisableIf,function(e){s.attr("draggable",!e)})}s.on("dragstart",function(u){u=u.originalEvent||u;u.dataTransfer.setData("Text",angular.toJson(i.$eval(o.dndDraggable)));u.dataTransfer.effectAllowed=o.dndEffectAllowed||"move";s.addClass("dndDragging");t(function(){s.addClass("dndDraggingSource")},0);n.dropEffect="none";r.isDragging=true;r.dragType=o.dndType?i.$eval(o.dndType):undefined;e(o.dndDragstart)(i,{event:u});u.stopPropagation()});s.on("dragend",function(t){t=t.originalEvent||t;var u=n.dropEffect;i.$apply(function(){switch(u){case"move":e(o.dndMoved)(i,{event:t});break;case"copy":e(o.dndCopied)(i,{event:t});break}});s.removeClass("dndDragging");s.removeClass("dndDraggingSource");r.isDragging=false;t.stopPropagation()});s.on("click",function(t){t=t.originalEvent||t;i.$apply(function(){e(o.dndSelected)(i,{event:t})});t.stopPropagation()});s.on("selectstart",function(){if(this.dragDrop)this.dragDrop();return false})}}]).directive("dndList",["$parse","$timeout","dndDropEffectWorkaround","dndDragTypeWorkaround",function(e,t,n,r){return function(i,s,o){function h(e,t,n){var r=l?e.offsetX||e.layerX:e.offsetY||e.layerY;var i=l?t.offsetWidth:t.offsetHeight;var s=l?t.offsetLeft:t.offsetTop;s=n?s:0;return r<s+i/2}function p(){return Array.prototype.indexOf.call(f.children,a)}function d(e){if(!r.isDragging&&!c)return false;if(!g(e.dataTransfer.types))return false;if(o.dndAllowedTypes&&r.isDragging){var t=i.$eval(o.dndAllowedTypes);if(angular.isArray(t)&&t.indexOf(r.dragType)===-1){return false}}if(o.dndDisableIf&&i.$eval(o.dndDisableIf))return false;return true}function v(){u.remove();s.removeClass("dndDragover");return true}function m(t,n,s){return e(t)(i,{event:n,index:p(),item:s||undefined,external:!r.isDragging,type:r.isDragging?r.dragType:undefined})}function g(e){if(!e)return true;for(var t=0;t<e.length;t++){if(e[t]==="Text"||e[t]==="text/plain")return true}return false}var u=angular.element("<li class='dndPlaceholder'></li>");var a=u[0];var f=s[0];var l=o.dndHorizontalList&&i.$eval(o.dndHorizontalList);var c=o.dndExternalSources&&i.$eval(o.dndExternalSources);s.on("dragover",function(e){e=e.originalEvent||e;if(!d(e))return true;if(a.parentNode!=f){s.append(u)}if(e.target!==f){var t=e.target;while(t.parentNode!==f&&t.parentNode){t=t.parentNode}if(t.parentNode===f&&t!==a){if(h(e,t)){f.insertBefore(a,t)}else{f.insertBefore(a,t.nextSibling)}}}else{if(h(e,a,true)){while(a.previousElementSibling&&(h(e,a.previousElementSibling,true)||a.previousElementSibling.offsetHeight===0)){f.insertBefore(a,a.previousElementSibling)}}else{while(a.nextElementSibling&&!h(e,a.nextElementSibling,true)){f.insertBefore(a,a.nextElementSibling.nextElementSibling)}}}if(o.dndDragover&&!m(o.dndDragover,e)){return v()}s.addClass("dndDragover");e.preventDefault();e.stopPropagation();return false});s.on("drop",function(e){e=e.originalEvent||e;if(!d(e))return true;e.preventDefault();var t=e.dataTransfer.getData("Text")||e.dataTransfer.getData("text/plain");var r;try{r=JSON.parse(t)}catch(s){return v()}if(o.dndDrop){r=m(o.dndDrop,e,r);if(!r){return v()}}var u=i.$eval(o.dndList);i.$apply(function(){u.splice(p(),0,r)});if(e.dataTransfer.dropEffect==="none"){if(e.dataTransfer.effectAllowed==="copy"||e.dataTransfer.effectAllowed==="move"){n.dropEffect=e.dataTransfer.effectAllowed}else{n.dropEffect=e.ctrlKey?"copy":"move"}}else{n.dropEffect=e.dataTransfer.dropEffect}v();e.stopPropagation();return false});s.on("dragleave",function(e){e=e.originalEvent||e;s.removeClass("dndDragover");t(function(){if(!s.hasClass("dndDragover")){u.remove()}},100)})}}]).factory("dndDragTypeWorkaround",function(){return{}}).factory("dndDropEffectWorkaround",function(){return{}})
 ;
+/**
+ * angular-ui-codemirror - This directive allows you to add CodeMirror to your textarea elements.
+ * @version v0.3.0 - 2015-05-03
+ * @link http://angular-ui.github.com
+ * @license MIT
+ */
+"use strict";function uiCodemirrorDirective(a,b){function c(a,c,h,i){var j=angular.extend({value:c.text()},b.codemirror||{},a.$eval(h.uiCodemirror),a.$eval(h.uiCodemirrorOpts)),k=d(c,j);e(k,h.uiCodemirror||h.uiCodemirrorOpts,a),f(k,i,a),g(k,h.uiRefresh,a),a.$on("CodeMirror",function(a,b){if(!angular.isFunction(b))throw new Error("the CodeMirror event requires a callback function");b(k)}),angular.isFunction(j.onLoad)&&j.onLoad(k)}function d(a,b){var c;return"TEXTAREA"===a[0].tagName?c=window.CodeMirror.fromTextArea(a[0],b):(a.html(""),c=new window.CodeMirror(function(b){a.append(b)},b)),c}function e(a,b,c){function d(b,c){angular.isObject(b)&&e.forEach(function(d){if(b.hasOwnProperty(d)){if(c&&b[d]===c[d])return;a.setOption(d,b[d])}})}if(b){var e=Object.keys(window.CodeMirror.defaults);c.$watch(b,d,!0)}}function f(a,b,c){b&&(b.$formatters.push(function(a){if(angular.isUndefined(a)||null===a)return"";if(angular.isObject(a)||angular.isArray(a))throw new Error("ui-codemirror cannot use an object or an array as a model");return a}),b.$render=function(){var c=b.$viewValue||"";a.setValue(c)},a.on("change",function(a){var d=a.getValue();d!==b.$viewValue&&c.$evalAsync(function(){b.$setViewValue(d)})}))}function g(b,c,d){c&&d.$watch(c,function(c,d){c!==d&&a(function(){b.refresh()})})}return{restrict:"EA",require:"?ngModel",compile:function(){if(angular.isUndefined(window.CodeMirror))throw new Error("ui-codemirror needs CodeMirror to work... (o rly?)");return c}}}angular.module("ui.codemirror",[]).constant("uiCodemirrorConfig",{}).directive("uiCodemirror",uiCodemirrorDirective),uiCodemirrorDirective.$inject=["$timeout","uiCodemirrorConfig"];;
 var module = module || {};
 
 module.angular = angular.module('module.angular', ['ngResource', 'ngAnimate']);
@@ -33795,11 +33795,6 @@ module.core = angular.module('module.core', ['module.angular', 'module.vendor', 
 var module = module || {};
 
 module.modules = angular.module('module.modules', []);;
-angular.module('filter.trusted', []).filter('trusted', ['$sce', function ($sce) {
-    return function(url) {
-        return $sce.trustAsResourceUrl(url);
-    };
-}]);;
 var events = events || {};
 
 var beforeSave = {};
@@ -34442,8 +34437,13 @@ var EditorController = function($rootScope, $scope, $file, $project, $rootScope,
 	$rootScope.$on('service.file.close', function(){
 		$scope.update();
 	});
-
+	
 	$rootScope.$on('service.file.save', function(){
+		$scope.update();
+	});
+
+	$rootScope.$on('menu.file-save', function(){
+		$file.save($scope.active);
 		$scope.update();
 	});
 }
@@ -35352,6 +35352,11 @@ app.directive('clickOutside', ['$document', function($document) {
 }]);
 
     ;
+angular.module('filter.trusted', []).filter('trusted', ['$sce', function ($sce) {
+    return function(url) {
+        return $sce.trustAsResourceUrl(url);
+    };
+}]);;
 /*
  * Use this area to load your modules. Some module have been pre-loaded for you like codemirror, some widgets and custom icons
  */
@@ -35468,6 +35473,27 @@ app.run(['$rootScope', '$timeout', '$file', '$menu', function($rootScope, $timeo
 					id: 'file-new',
 					label: 'New File',
 					hotkey: 'meta+n',
+				},
+				{
+					type: 'separator'
+				},
+				{
+					id: 'file-close',
+					label: 'Close File',
+					hotkey: 'meta+w'
+				},
+				{
+					type: 'separator'
+				},
+				{
+					id: 'save',
+					label: 'Save',
+					hotkey: 'meta+s'
+				},
+				{
+					id: 'save-as',
+					label: 'Save As...',
+					hotkey: 'meta+shift+s'
 				}
 			]
 		},

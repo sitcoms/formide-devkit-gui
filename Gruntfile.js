@@ -35,7 +35,6 @@ module.exports = function(grunt) {
 					'./bower_components/angular-resource/angular-resource.js',
 					'./bower_components/angular-animate/angular-animate.js',
 					'./bower_components/angular-sanitize/angular-sanitize.js',
-					'./bower_components/angular-ui-codemirror/ui-codemirror.min.js',
 
 					/*
 					 *	Angular vendor dependencies.
@@ -45,6 +44,7 @@ module.exports = function(grunt) {
 					'./bower_components/ngDialog/js/ngDialog.js',
 					'./bower_components/angular-local-storage/dist/angular-local-storage.js',
 					'./bower_components/angular-drag-and-drop-lists/angular-drag-and-drop-lists.min.js',
+					'./bower_components/angular-ui-codemirror/ui-codemirror.min.js',
 
 					/*
 					 *	Load modules.
@@ -60,7 +60,6 @@ module.exports = function(grunt) {
 					 *	Include source files
 					 */
 					'./core/dependencies/**/*.js',
-					'./core/filters/**/*.js',
 					'./core/services/**/*.js',
 
 					/*
@@ -69,6 +68,7 @@ module.exports = function(grunt) {
 					'./core/app.js',
 					'./core/controllers/**/*.js',
 					'./core/directives/**/*.js',
+					'./core/filters/**/*.js',
 
 					/*
 					 *	Include app specific files
@@ -120,15 +120,7 @@ module.exports = function(grunt) {
 				prereleaseName: false,
 				regExp: false
 			}
-		},
-		
-		nodewebkit: {
-			options: {
-				platforms: ['win','osx'],
-				buildDir: './build', // Where the build version of my node-webkit app is saved
-    		},
-			src: [''] // Your node-webkit app
-  		}
+		}
 	}
 
 	grunt.initConfig();

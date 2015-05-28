@@ -114,6 +114,27 @@ app.run(['$rootScope', '$timeout', '$file', '$menu', function($rootScope, $timeo
 					id: 'file-new',
 					label: 'New File',
 					hotkey: 'meta+n',
+				},
+				{
+					type: 'separator'
+				},
+				{
+					id: 'file-close',
+					label: 'Close File',
+					hotkey: 'meta+w'
+				},
+				{
+					type: 'separator'
+				},
+				{
+					id: 'save',
+					label: 'Save',
+					hotkey: 'meta+s'
+				},
+				{
+					id: 'save-as',
+					label: 'Save As...',
+					hotkey: 'meta+shift+s'
 				}
 			]
 		},
