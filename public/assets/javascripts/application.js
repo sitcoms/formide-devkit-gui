@@ -35403,7 +35403,7 @@ loadModule('font_awesome',	'theme',	'./app/components/themes/font-awesome/');
 app.run(['$rootScope', '$timeout', '$file', '$menu', function($rootScope, $timeout, $file, $menu) {
 	
 	// devmode
-	require('nw.gui').Window.get().showDevTools();
+	//require('nw.gui').Window.get().showDevTools();
 	
 	// set editor config
 	$file.setConfig([
