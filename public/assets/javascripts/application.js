@@ -35397,6 +35397,14 @@ loadModule('theme_light',	'theme',	'./app/components/themes/theme_light/');
 loadModule('custom_icons',	'theme',	'./app/components/themes/custom_icons/');
 loadModule('font_awesome',	'theme',	'./app/components/themes/font-awesome/');
 
+// set codemirror options
+var codemirrorOpts = {
+	indentWithTabs: true,
+	indentUnit: 4
+}
+
+window.localStorage.codemirrorOpts = JSON.stringify(codemirrorOpts);
+
 /*
  * Use this area to define global settings for your app like the file editor config and devtools
  */
@@ -35521,6 +35529,10 @@ app.run(['$rootScope', '$timeout', '$file', '$menu', function($rootScope, $timeo
 			]
 		}
 	]);
+	
+	$rootScope.$on('menu.devtools', function(){
+		require('nw.gui').Window.get().showDevTools();
+	});
 }]);;
 var fs 		= require('fs-extra');
 var path 	= require('path');
