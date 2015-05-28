@@ -35466,11 +35466,13 @@ app.run(['$rootScope', '$timeout', '$file', '$menu', function($rootScope, $timeo
 			id: 'file',
 			label: 'File',
 			submenu: [
+/*
 				{
 					id: 'project-new',
 					label: 'New Project...',
 					hotkey: 'meta+shift+n'
 				},
+*/
 				{
 					id: 'project-open',
 					label: 'Open Project...',
@@ -35499,6 +35501,7 @@ app.run(['$rootScope', '$timeout', '$file', '$menu', function($rootScope, $timeo
 				}
 			]
 		},
+/*
 		{
 			id: 'run',
 			label: 'Run',
@@ -35517,6 +35520,7 @@ app.run(['$rootScope', '$timeout', '$file', '$menu', function($rootScope, $timeo
 				}
 			]
 		},
+*/
 		{
 			id: 'editor',
 			label: 'Editor',
