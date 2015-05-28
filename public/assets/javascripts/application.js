@@ -35488,11 +35488,6 @@ app.run(['$rootScope', '$timeout', '$file', '$menu', function($rootScope, $timeo
 					id: 'save',
 					label: 'Save',
 					hotkey: 'meta+s'
-				},
-				{
-					id: 'save-as',
-					label: 'Save As...',
-					hotkey: 'meta+shift+s'
 				}
 			]
 		},
@@ -35511,6 +35506,17 @@ app.run(['$rootScope', '$timeout', '$file', '$menu', function($rootScope, $timeo
 				{
 					id: 'manager',
 					label: 'View in manager'
+				}
+			]
+		},
+		{
+			id: 'editor',
+			label: 'Editor',
+			submenu: [
+				{
+					id: 'devtools',
+					label: 'Show Inspector',
+					hotkey: 'meta+shift+i'
 				}
 			]
 		}

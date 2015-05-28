@@ -150,6 +150,17 @@ app.run(['$rootScope', '$timeout', '$file', '$menu', function($rootScope, $timeo
 					label: 'View in manager'
 				}
 			]
+		},
+		{
+			id: 'editor',
+			label: 'Editor',
+			submenu: [
+				{
+					id: 'devtools',
+					label: 'Show Inspector',
+					hotkey: 'meta+shift+i'
+				}
+			]
 		}
 	]);
 }]);
