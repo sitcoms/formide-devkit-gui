@@ -130,11 +130,6 @@ app.run(['$rootScope', '$timeout', '$file', '$menu', function($rootScope, $timeo
 					id: 'save',
 					label: 'Save',
 					hotkey: 'meta+s'
-				},
-				{
-					id: 'save-as',
-					label: 'Save As...',
-					hotkey: 'meta+shift+s'
 				}
 			]
 		},
