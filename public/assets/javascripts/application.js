@@ -33775,8 +33775,9 @@ module.vendor = angular.module('module.vendor', ['ngTagsInput', 'ngDialog', 'Loc
 ;
 var module = module || {};
 
-module.filters = angular.module('module.filters', []);
-;
+module.filters = angular.module('module.filters', [
+	'filter.trusted'
+]);;
 var module = module || {};
 
 module.services = angular.module('module.services', [
@@ -33794,6 +33795,11 @@ module.core = angular.module('module.core', ['module.angular', 'module.vendor', 
 var module = module || {};
 
 module.modules = angular.module('module.modules', []);;
+angular.module('filter.trusted', []).filter('trusted', ['$sce', function ($sce) {
+    return function(url) {
+        return $sce.trustAsResourceUrl(url);
+    };
+}]);;
 var events = events || {};
 
 var beforeSave = {};
@@ -34084,8 +34090,11 @@ var beforeSave = {};
 
 angular.module('sdk.popup', []).factory('$popup', ['$rootScope', 'ngDialog', function ($rootScope, ngDialog) {
 	var factory = {};
-
+	
 	factory.open = function(name, scope) {
+	
+		$rootScope.$emit('service.popup.open', name);
+		
 		var dir = '';
 		for (var i=0; i<angularModules.length; i++) {
 
@@ -34096,11 +34105,18 @@ angular.module('sdk.popup', []).factory('$popup', ['$rootScope', 'ngDialog', fun
 
 		var html_path = path.join(dir, 'component.html');
 
-		ngDialog.open({ 
+		ngDialog.open({
+			preCloseCallback: function(){
+				$rootScope.$apply(function(){
+					$rootScope.$emit('service.popup.close', open);
+				});
+			},
 			template: html_path,
 			className: 'popup-' + name,
 			scope: scope
 		});
+		
+		open = name;
 	}
 
 	factory.close = function() {
@@ -34698,13 +34714,9 @@ MenuController.$inject = ['$rootScope', '$scope', '$timeout'];
 app.controller("MenuController", MenuController);;
 var gui			= require('nw.gui');
 var path		= require('path'); // auch
-
 var open		= require("open");
 var fs_extra	= require('fs-extra');
 var trash		= require('trash');
-var watchTree 	= require("fs-watch-tree").watchTree;
-
-var Gaze 		= require('gaze').Gaze;
 var sane		= require('sane');
 
 var SidebarController = function($scope, $rootScope, $file, $timeout, $project) {
@@ -34769,39 +34781,9 @@ var SidebarController = function($scope, $rootScope, $file, $timeout, $project) 
 		$project.setPath(rootPath);
 		
         $scope.$parent.path = rootPath;
-        
-        // filetree, watch for changes
-/*
-		watch = watchTree($scope.$parent.path, function (event) { // $parent is ApplicationController
-			$scope.$apply(function() {
-				$scope.update();
-			});
-		});
-*/
-		
-		
-		//gaze = new Gaze($scope.$parent.path + '/**/*'); // $parent is ApplicationController
 		
 		watcher = sane($scope.$parent.path, {glob: ['**/*']});
-		
-/*
-		gaze.on('rename', function(newPath, oldPath) {
-			console.log(newPath);
-			console.log(oldPath);
-			gaze.add(newPath, function() {
-				
-			});
-			gaze.remove(oldPath, function() {
-				
-			});
-			$scope.$apply(function() {
-				$scope.update();
-			});
-		});
-*/
-		
 		watcher.on('all', function(event, filepath) {
-			console.log(event);
 			$scope.$apply(function() {
 				$scope.update();
 			});
