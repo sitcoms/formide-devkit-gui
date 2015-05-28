@@ -1,10 +1,3 @@
-if(window.localStorage.sdk_settings) {
-	document.getElementsByTagName('wrap')[0].className = JSON.parse(window.localStorage.sdk_settings)['theme'];
-}
-else {
-	document.getElementsByTagName('wrap')[0].className = 'dark';
-}
-
 var SettingsController = function($scope, $rootScope, $http) {
 	
 	$scope.themes = [

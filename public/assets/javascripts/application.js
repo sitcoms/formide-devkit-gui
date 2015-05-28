@@ -36367,13 +36367,6 @@ var LoginController = function($scope, $rootScope) {
 LoginController.$inject = ['$scope', '$rootScope'];
 
 app.controller("LoginController", LoginController);;
-if(window.localStorage.sdk_settings) {
-	document.getElementsByTagName('wrap')[0].className = JSON.parse(window.localStorage.sdk_settings)['theme'];
-}
-else {
-	document.getElementsByTagName('wrap')[0].className = 'dark';
-}
-
 var SettingsController = function($scope, $rootScope, $http) {
 	
 	$scope.themes = [
@@ -36416,4 +36409,11 @@ var SettingsController = function($scope, $rootScope, $http) {
 
 SettingsController.$inject = ['$scope', '$rootScope', '$http'];
 
-app.controller("SettingsController", SettingsController);
+app.controller("SettingsController", SettingsController);;
+// set theme options
+try {
+	document.getElementsByTagName('wrap')[0].className = JSON.parse(window.localStorage.sdk_settings)['theme'];
+}
+catch(e) {
+	document.getElementsByTagName('wrap')[0].className = 'dark';
+}
