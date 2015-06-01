@@ -1,3 +1,7 @@
+var fs				= require('fs');
+var path			= require('path');
+var child_process	= require('child_process');
+
 module.exports = function(grunt) {
 	window = {};
 
@@ -140,10 +144,80 @@ module.exports = function(grunt) {
 	 * Register Tasks
 	 */
 	grunt.registerTask('build:config', ['clean:config']);
-
 	grunt.registerTask('js:dist', ['build:config', 'concat:', 'uglify']);
 	grunt.registerTask('js:dev', ['build:config', 'concat']);
-
+	
   	grunt.registerTask('default', ['clean:assets', 'js:' + ((window.ENV.type == 'development') ? 'dev' : 'dist')]);
-
+  	
+  	/*
+	 * Publish new version
+	 */
+  	grunt.registerTask('compile', compile);
+  	grunt.registerTask('pack', pack);
+  	grunt.registerTask('archive', archive);
+  	
+  	grunt.registerTask('publish', ['build:config', 'concat:', 'uglify', 'default', 'compile', 'pack', 'archive']);
 };
+
+function compile() {
+	
+	// get activedependencies
+	var manifest = JSON.parse( fs.readFileSync('package.json').toString() );
+	
+	// change to current dir
+	process.chdir( __dirname );
+	
+	// reset /build folder
+	child_process.execSync('rm -rf ./build/');
+	child_process.execSync('mkdir ./build/');
+	
+	// copy items to build folder (needed for windows dist)
+	child_process.execSync('cp -r ./package.json ./build/package.json');
+	child_process.execSync('rsync -av --exclude=".*" ./core/ ./build/core/');
+	child_process.execSync('rsync -av --exclude=".*" ./app/ ./build/app/');
+	child_process.execSync('rsync -av --exclude=".*" ./public/ ./build/public/');
+	
+	// copy used node_modules
+	child_process.execSync('mkdir ./build/node_modules/');
+	for( var dependency in manifest.dependencies ) {
+		child_process.execSync('cp -r ./node_modules/' + dependency + '/ ./build/node_modules/' + dependency + '/' );
+	}
+}
+
+function pack() {
+	
+	// change to current dir
+	process.chdir( __dirname );
+	
+	// reset /dist folder
+	child_process.execSync('rm -rf ./dist/');
+	child_process.execSync('mkdir ./dist/');
+	
+	// pack win32
+	child_process.execSync('mkdir ./dist/win32/');
+	child_process.execSync('cp -r ./bin/win32/* ./dist/win32/');
+	child_process.execSync('cp -r ./build/ ./dist/win32/');
+	
+	// pack osx64
+	child_process.execSync('mkdir ./dist/osx64/');
+	child_process.execSync('cp -r ./bin/osx64/nwjs.app ./dist/osx64/Formide\\ Development\\ Kit.app');
+	child_process.execSync('mkdir ./dist/osx64/Formide\\ Development\\ Kit.app/Contents/Resources/app.nw/');
+	child_process.execSync('cp -r ./build/ ./dist/osx64/Formide\\ Development\\ Kit.app/Contents/Resources/app.nw/');
+	child_process.execSync('cp ./app/assets/icons/devkit.icns ./dist/osx64/Formide\\ Development\\ Kit.app/Contents/Resources/nw.icns');
+}
+
+function archive() {
+	
+	// change to current dir
+	process.chdir( __dirname );
+	
+	// reset /archive folder
+	child_process.execSync('rm -rf ./archive/');
+	child_process.execSync('mkdir ./archive/');
+	
+	// win32
+	child_process.execSync('zip -r ./archive/formide-devkit-win32-latest.zip ./dist/win32/');
+	
+	// osx64
+	child_process.execSync('hdiutil create -format UDZO -volname "Formide Development Kit" -srcfolder ./dist/osx64/ ./archive/formide-devkit-osx64-latest.dmg');
+}

@@ -33767,7 +33767,7 @@ angular.module("dndLists",[]).directive("dndDraggable",["$parse","$timeout","dnd
 "use strict";function uiCodemirrorDirective(a,b){function c(a,c,h,i){var j=angular.extend({value:c.text()},b.codemirror||{},a.$eval(h.uiCodemirror),a.$eval(h.uiCodemirrorOpts)),k=d(c,j);e(k,h.uiCodemirror||h.uiCodemirrorOpts,a),f(k,i,a),g(k,h.uiRefresh,a),a.$on("CodeMirror",function(a,b){if(!angular.isFunction(b))throw new Error("the CodeMirror event requires a callback function");b(k)}),angular.isFunction(j.onLoad)&&j.onLoad(k)}function d(a,b){var c;return"TEXTAREA"===a[0].tagName?c=window.CodeMirror.fromTextArea(a[0],b):(a.html(""),c=new window.CodeMirror(function(b){a.append(b)},b)),c}function e(a,b,c){function d(b,c){angular.isObject(b)&&e.forEach(function(d){if(b.hasOwnProperty(d)){if(c&&b[d]===c[d])return;a.setOption(d,b[d])}})}if(b){var e=Object.keys(window.CodeMirror.defaults);c.$watch(b,d,!0)}}function f(a,b,c){b&&(b.$formatters.push(function(a){if(angular.isUndefined(a)||null===a)return"";if(angular.isObject(a)||angular.isArray(a))throw new Error("ui-codemirror cannot use an object or an array as a model");return a}),b.$render=function(){var c=b.$viewValue||"";a.setValue(c)},a.on("change",function(a){var d=a.getValue();d!==b.$viewValue&&c.$evalAsync(function(){b.$setViewValue(d)})}))}function g(b,c,d){c&&d.$watch(c,function(c,d){c!==d&&a(function(){b.refresh()})})}return{restrict:"EA",require:"?ngModel",compile:function(){if(angular.isUndefined(window.CodeMirror))throw new Error("ui-codemirror needs CodeMirror to work... (o rly?)");return c}}}angular.module("ui.codemirror",[]).constant("uiCodemirrorConfig",{}).directive("uiCodemirror",uiCodemirrorDirective),uiCodemirrorDirective.$inject=["$timeout","uiCodemirrorConfig"];;
 var module = module || {};
 
-module.angular = angular.module('module.angular', ['ngResource', 'ngAnimate']);
+module.angular = angular.module('module.angular', ['ngResource', 'ngAnimate', 'cfp.hotkeys']);
 ;
 var module = module || {};
 
@@ -34718,7 +34718,7 @@ var fs_extra	= require('fs-extra');
 var trash		= require('trash');
 var sane		= require('sane');
 
-var SidebarController = function($scope, $rootScope, $file, $timeout, $project) {
+var SidebarController = function($scope, $rootScope, $file, $timeout, $project, hotkeys) {
 	
 	$scope.projectLoaded = false;
 	$scope.selected = [];
@@ -34726,6 +34726,77 @@ var SidebarController = function($scope, $rootScope, $file, $timeout, $project) 
 	$scope.expanded = [];
 	$scope.filetree = {};
 	$scope.selectedIndex = 0;
+	
+	// hotkey: right
+	hotkeys.add({
+		combo: 'right',
+		callback: function() {
+			$scope.selected.forEach(function( item ){
+				
+				if( fs_extra.lstatSync(item).isFile() ) {
+					$scope.open(item);
+				}
+				
+				if( fs_extra.lstatSync(item).isDirectory() ) {
+					$scope.expand( item, true );
+				}
+			});
+		}
+	});
+	
+	// hotkey: left
+	hotkeys.add({
+		combo: 'left',
+		callback: function() {			
+			$scope.selected.forEach(function( item ){
+				
+				// if file, select parent directory
+				if( fs_extra.lstatSync(item).isFile() ) {
+					var parentDir = path.join( item, '..' );
+					$scope.selected = [ parentDir ];
+				}
+								
+				// if folder
+				if( fs_extra.lstatSync(item).isDirectory() ) {
+					
+					// if selected, collapse it, else, select parent dir
+					if( $scope.isExpanded( item) ) {
+						$scope.expand( item, false );
+						$scope.selected = [ item ];
+					} else {
+						
+						if( item == $project.getPath() ) return;
+						
+						var parentDir = path.join( item, '..' );
+						$scope.selected = [ parentDir ];						
+					}
+				}
+			});
+		}
+	});
+	
+	// hotkey: up
+	hotkeys.add({
+		combo: 'up',
+		callback: function() {
+			// todo
+		}
+	});
+	
+	// hotkey: down
+	hotkeys.add({
+		combo: 'down',
+		callback: function() {
+			// todo
+		}
+	});
+	
+	hotkeys.add({
+		combo: 'enter',
+		callback: function(){
+			$scope.renaming = $scope.selected[0];
+		}
+	});
 	
 	//var watch;
 	var watcher;
@@ -34849,7 +34920,7 @@ var SidebarController = function($scope, $rootScope, $file, $timeout, $project) 
 	/*
 	 * expand filePath
 	 */
-	$scope.expand = function(filePath, expanded) {
+	$scope.expand = function(filePath, expanded) {			
 		if( expanded ) {
         	$scope.expanded.push(filePath);	    
 		} 
@@ -35163,7 +35234,7 @@ var SidebarController = function($scope, $rootScope, $file, $timeout, $project) 
 	});
 }
 
-SidebarController.$inject = ['$scope', '$rootScope', '$file', '$timeout', '$project'];
+SidebarController.$inject = ['$scope', '$rootScope', '$file', '$timeout', '$project', 'hotkeys'];
 
 app.controller("SidebarController", SidebarController);
 
