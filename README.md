@@ -31,11 +31,6 @@ This core ships some components, that can be found in `./core/components/`. You 
 
 Run `grunt watch` before running `nw.js .` while development, or your changes won't be applied.
 
-### Build instructions
-
-1. install node-webkit-builder ```npm install node-webkit-builder -g```
-2. run ```node build``` in the directory of this repository
-
 ## Contribute
 Contributions are more than welcome! Send a pull request from your own fork to do so.
 
