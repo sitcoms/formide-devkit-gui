@@ -34397,8 +34397,6 @@ var ApplicationController = function($scope, $rootScope, $timeout, $stoplight, $
 	
 	$scope.platform = os.platform();
 
-	$scope.platform = 'windows';
-
 	$scope.focus = true;
 	$scope.blurred = false;
 
