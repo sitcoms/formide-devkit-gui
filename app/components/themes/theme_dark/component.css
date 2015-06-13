@@ -1,5 +1,6 @@
 /*Dark Theme*/
 .dark {
+  /* sub-submenu */
   /* e.g. var, function */
   /* e.g. #id */
   /* e.g. 20 */
@@ -67,6 +68,46 @@
     color: #DFE1E8; }
   .dark header {
     background: #1C1F26; }
+  .dark header {
+    z-index: 99; }
+  .dark #header-menu > ul > li {
+    padding: 0 8px;
+    font-size: 13px;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
+    color: white; }
+  .dark #header-menu > ul > li.visibleSubmenu {
+    color: black;
+    text-shadow: none;
+    border-radius: 3px 3px 0 0;
+    background: white; }
+  .dark #header-menu > ul > li > .label-wrap {
+    opacity: 0.9; }
+  .dark #header-menu > ul > li:hover > .label-wrap {
+    opacity: 1; }
+  .dark #header-menu ul li ul {
+    box-shadow: 0 3px 3px rgba(0, 0, 0, 0.1);
+    z-index: 3; }
+  .dark #header-menu ul li ul li .separator {
+    background: #ddd; }
+  .dark #header-menu ul li ul li .label-wrap {
+    padding: 1px 10px;
+    color: black;
+    background: white; }
+  .dark #header-menu ul li ul li:hover > .label-wrap {
+    background: #333D46;
+    color: white; }
+  .dark #header-menu ul li ul li:hover .label-wrap .arrow {
+    border-left-color: white; }
+  .dark #header-menu ul li ul li:first-child > .label-wrap {
+    border-radius: 0 3px 0 0; }
+  .dark #header-menu ul li ul li:last-child > .label-wrap {
+    border-radius: 0 0 3px 3px; }
+  .dark #header-menu ul li ul li.has-submenu:first-child:hover > .label-wrap {
+    border-top-right-radius: 0; }
+  .dark #header-menu ul li ul li.has-submenu:last-child:hover > .label-wrap {
+    border-bottom-right-radius: 0; }
+  .dark #header-menu ul li ul li ul li:first-child:last-child > .label-wrap {
+    border-radius: 0 3px 3px 0; }
   .dark #header-stoplight {
     padding: 0 12px; }
   .dark sidebar {
