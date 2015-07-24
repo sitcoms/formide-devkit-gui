@@ -1,7 +1,7 @@
 /*
  * Use this area to load your modules. Some module have been pre-loaded for you like codemirror, some widgets and custom icons
  */
- 
+
 //CORE
 // editors
 loadModule('codemirror', 	'editor',	'./core/components/editors/devkit-editor-codemirror/', ['ui.codemirror']);
@@ -20,7 +20,7 @@ loadModule('markdown', 		'widget',	'./core/components/widgets/devkit-widget-mark
 // APP
 // editors
 loadModule('manifest', 		'editor',	'./app/components/editors/devkit-printr-editor-manifest/');
-loadModule('viewer', 		'editor',	'./app/components/editors/devkit-printr-editor-viewer/', ['printr.viewer']);
+loadModule('viewer', 		'editor',	'./app/components/editors/devkit-printr-editor-viewer/', ['formide.viewer']);
 
 // headers
 loadModule('auth', 			'header',	'./app/components/headers/devkit-printr-header-auth/');
@@ -51,10 +51,10 @@ window.localStorage.codemirrorOpts = JSON.stringify(codemirrorOpts);
  * Use this area to define global settings for your app like the file editor config and devtools
  */
 app.run(['$rootScope', '$timeout', '$file', '$menu', function($rootScope, $timeout, $file, $menu) {
-	
+
 	// devmode
 	//require('nw.gui').Window.get().showDevTools();
-	
+
 	// set editor config
 	$file.setConfig([
 		{
@@ -102,7 +102,7 @@ app.run(['$rootScope', '$timeout', '$file', '$menu', function($rootScope, $timeo
 			}
 		}
 	]);
-	
+
 	$menu.setConfig([
 		{
 			id: 'file',
@@ -175,7 +175,7 @@ app.run(['$rootScope', '$timeout', '$file', '$menu', function($rootScope, $timeo
 			]
 		}
 	]);
-	
+
 	$rootScope.$on('menu.devtools', function(){
 		require('nw.gui').Window.get().showDevTools();
 	});
